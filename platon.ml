@@ -1,7 +1,3 @@
-module Lexer = struct
-  end
-module Parser = struct
-  end
 module Ast = struct
     module L0 = struct
 	      module Term = struct
@@ -24,6 +20,18 @@ module Ast = struct
 	           and tv = Unbound of string * level | Link of t
 	           and levels = { mutable level_old : level; mutable level_new : level }
 	        end
+
+              module PPrint = struct
+                  let rec string_of_term : Term.t -> string = function
+                    | Term.Variable v -> v
+                    | Term.Application (e,e') -> (string_of_term e) ^ " " ^ (string_of_term e')
+                    | Term.Lambda (v,e) -> "fn " ^ v ^ " . " ^ (string_of_term e)
+                    | Term.Let (v,e,e') -> "let " ^ v ^ " = " ^ (string_of_term e) ^ " . " ^ (string_of_term e')
+                  let rec string_of_type : Type.t -> string = function
+                    | Type.TVar v -> assert false
+                    | Type.QVar v -> assert false
+                    | Type.TArrow (t,t',l) -> (string_of_type t) ^ "->" ^ (string_of_type t')
+                end
 	    end
     module L1 = struct
 	      module Type = struct
@@ -53,14 +61,18 @@ module Ast = struct
 module TypeInference = struct
     open Ast.L0
 
+    type varname = string
+    type env = (varname * Type.t) list
     type type_inference_state = {
         mutable gensym_counter : int;
         mutable current_level  : int;
         mutable to_be_level_adjusted : Type.t list;
       }
+
     let reset_gensym : type_inference_state -> unit =
       fun s -> s.gensym_counter <- 0
-    let reset_level : type_inference_state -> unit = fun s -> s.current_level <- 1
+    let reset_level : type_inference_state -> unit =
+      fun s -> s.current_level <- 1
     let reset_level_adjustment : type_inference_state -> unit =
       fun s -> s.to_be_level_adjusted <- []
     let reset_type_inference_state : type_inference_state -> unit =
@@ -79,11 +91,10 @@ module TypeInference = struct
     let new_arrow : type_inference_state -> Type.t -> Type.t -> Type.t =
       fun s ty1 ty2 -> Type.TArrow (ty1, ty2, {Type.level_new = s.current_level; Type.level_old = s.current_level})
 
-(* Chase the links of bound variables, returning either
-   a free variable or a constructed type.
-   OCaml's typing/btype.ml has the same function with the same name.
-   Unlike OCaml, we do path compression.
-     *)
+    (* Chase the links of bound variables, returning either a free
+       variable or a constructed type. OCaml's typing/btype.ml has the
+       same function with the same name. Unlike OCaml, we do path
+       compression. *)
     let rec repr : Type.t -> Type.t = function
       | Type.TVar ({contents = Type.Link t} as tvr) ->
 	       let t = repr t in
@@ -94,6 +105,19 @@ module TypeInference = struct
       | Type.TVar {contents = Type.Unbound (_,l)} -> l
       | Type.TArrow (_,_,ls) -> ls.Type.level_new
       | _ -> assert false
+
+    let rec cycle_free : Type.t -> unit = function
+      | Type.TVar {contents = Type.Unbound _} -> ()
+      | Type.TVar {contents = Type.Link ty}   -> cycle_free ty
+      | Type.TArrow (_,_,ls) when ls.Type.level_new = Type.marked_level -> failwith "occurs check"
+      | Type.TArrow (t1,t2,ls) ->
+         let level = ls.Type.level_new in
+         ls.Type.level_new <- Type.marked_level;
+         cycle_free t1;
+         cycle_free t2;
+         ls.Type.level_new <- level
+      | _ -> assert false
+
 
     let update_level : type_inference_state -> Type.level -> Type.t -> unit = fun s l -> function
       |Type.TVar ({contents = Type.Unbound (n,l')} as tvr) ->
@@ -116,11 +140,13 @@ module TypeInference = struct
       else match (repr t, repr t') with
 	         | (Type.TVar ({contents = Type.Unbound (_,l1)} as tv1) as t1,
 	            (Type.TVar ({contents = Type.Unbound (_,l2)} as tv2) as t2)) ->
-              if l1 > l2 then tv1 := Type.Link t2 else tv2 := Type.Link t1
+                    if l1 > l2
+                    then tv1 := Type.Link t2
+                    else tv2 := Type.Link t1
 	         | (Type.TVar ({contents = Type.Unbound (_,l)} as tv),t')
 	         | (t', Type.TVar ({contents = Type.Unbound (_,l)} as tv)) ->
 		          update_level s l t';
-              tv := Type.Link t'
+                          tv := Type.Link t'
 	         | (Type.TArrow (tyl1, tyl2,ll), Type.TArrow (tyr1, tyr2, lr)) ->
 	            if ll.Type.level_new = Type.marked_level || lr.Type.level_new = Type.marked_level then
 		            failwith "cycle: occurs check.";
@@ -140,7 +166,7 @@ module TypeInference = struct
     let force_delayed_adjustments : type_inference_state -> unit = fun s ->
       let rec loop acc level ty =
         match repr ty with
-        | Type.TVar ({contents = Type.Unbound (name,l)} as tvr) when l > level -> tvr := Unbound (name,level); acc
+        | Type.TVar ({contents = Type.Unbound (name,l)} as tvr) when l > level -> tvr := Type.Unbound (name,level); acc
         | Type.TArrow (_,_,ls) when ls.Type.level_new = Type.marked_level ->
            failwith "occurs check"
         | Type.TArrow (_,_,ls) as ty ->
@@ -176,22 +202,42 @@ module TypeInference = struct
       in loop ty
 
     let inst : type_inference_state -> Type.t -> Type.t =
-      let rec loop subst = function
-        | Type.TVar {contents = Unbound (name,l)} when
-               l = Type.generic_level
-                     begin
-                       try (List.assoc name subst, subst)
-                       with Not_found ->
-                         let tv = new_var s in
-                         (tv, (name,tv)::subst)
-                     end
-        | Type.TVar {contents = Type.Link ty} -> loop subst ty
+      let rec loop s subst = function
+        | Type.TVar {contents = Type.Unbound (name,l)} when l = Type.generic_level ->
+           begin
+             try (List.assoc name subst, subst)
+             with Not_found ->
+               let tv = new_var s in
+               (tv, (name,tv)::subst)
+           end
+        | Type.TVar {contents = Type.Link ty} -> loop s subst ty
         | Type.TArrow (ty1,ty2,ls) when ls.Type.level_new = Type.generic_level ->
-           let (ty1, subst) = loop subst ty1 in
-           let (ty2, subst) = loop subst ty2 in
+           let (ty1, subst) = loop s subst ty1 in
+           let (ty2, subst) = loop s subst ty2 in
            (new_arrow s ty1 ty2, subst)
         | ty -> (ty,subst)
-      in fun ty -> fst (loop [] ty)
+      in fun s ty -> fst (loop s [] ty)
+
+    let rec typeof : type_inference_state -> env -> Term.t -> Type.t =
+      fun s env -> function
+      | Term.Variable x -> inst s (List.assoc x env)
+      | Term.Lambda (x,e) ->
+         let ty_x = new_var s in
+         let ty_e = typeof s ((x,ty_x)::env) e in
+         new_arrow s ty_x ty_e
+      | Term.Application (e1, e2) ->
+         let ty_fun = typeof s env e1 in
+         let ty_arg = typeof s env e2 in
+         let ty_res = new_var s in
+         unify s ty_fun (new_arrow s ty_arg ty_res);
+         ty_res
+      | Term.Let (x,e,e2) ->
+         enter_level s;
+         let ty_e = typeof s env e in
+         leave_level s;
+         gen s ty_e;
+         typeof s ((x, ty_e) :: env) e2
+
  end
 
 
@@ -206,11 +252,11 @@ module Codegen = struct
 	named_values : (string, Llvm.llvalue) Hashtbl.t;
       }
 
-    let codegen_literal ctx = function
+    let codegen_literal = fun ctx -> function
       | Ast.Term.Double d -> Llvm.const_float (Llvm.double_type ctx.llvm_context) d
       | Ast.Term.Integer i -> Llvm.const_int (Llvm.integer_type ctx.llvm_context 32) i
 
-    let rec codegen_term ctx = function
+    let rec codegen_term = fun ctx -> function
       | Ast.Term.Literal l -> codegen_literal ctx l
       | Ast.Term.Variable name ->
 	 (try Hashtbl.find ctx.named_values name with
@@ -237,7 +283,7 @@ module Codegen = struct
 	 let args = Array.map (codegen_term ctx) args in
 	 Llvm.build_call callee args "calltmp" ctx.llvm_builder
 
-    let codegen_proto ctx = function
+    let codegen_proto = fun ctx -> function
       | Ast.Prototype (name,args) ->
 	 let doubles = Array.make (Array.length args) (Llvm.double_type ctx.llvm_context) in
 	 let ft = Llvm.function_type (Llvm.double_type ctx.llvm_context) doubles in
@@ -290,3 +336,62 @@ let () =
     Llvm.dump_value l;
     Llvm.dump_module the_module
   end
+
+
+let id = Ast.L0.Term.Lambda ("x", Ast.L0.Term.Variable"x");;
+
+let top_type_check : Ast.L0.Term.t -> Ast.L0.Type.t = fun exp ->
+  let initial_state = { TypeInference.gensym_counter = 0;
+                        TypeInference.current_level = 0;
+                        TypeInference.to_be_level_adjusted = []} in
+  TypeInference.reset_type_inference_state initial_state;
+  TypeInference.reset_level_adjustment initial_state;
+  let ty = TypeInference.typeof initial_state [] exp in
+  TypeInference.cycle_free ty;
+  ty
+
+
+module Test_inference = struct
+    open OUnit2
+    open Ast.L0.Term
+    open Ast.L0.Type
+
+    let test1 text_ctxt = assert_equal
+                            (TArrow
+                            (TVar
+                               {contents =
+                                  Link
+                                    (TArrow
+                                       (TVar
+                                          {contents =
+                                             Link
+                                               (TArrow (TVar {contents = Unbound ("d", 1)},
+                                                        TVar {contents = Unbound ("e", 1)},
+                                                        {level_old = 1; level_new = 1}))},
+                                        TVar {contents = Unbound ("c", 1)}, {level_old = 1; level_new = 1}))},
+                             TArrow
+                               (TVar
+                                  {contents =
+                                     Link
+                                       (TArrow (TVar {contents = Unbound ("d", 1)},
+                                                TVar {contents = Unbound ("e", 1)}, {level_old = 1; level_new = 1}))},
+                                TArrow (TVar {contents = Unbound ("d", 1)},
+                                        TVar {contents = Unbound ("e", 1)}, {level_old = 1; level_new = 1}),
+                                {level_old = 1; level_new = 1}),
+                             {level_old = 1; level_new = 1}))
+                            (  top_type_check (Lambda ("x", Lambda ("y",Let ("x",Application (Variable"x",Variable"y"),
+                                                                             Lambda ("x",Application (Variable"y",Variable"x"))))))
+                            )
+    let test2 text_ctxt = assert_equal
+                            (TArrow (TVar {contents = Unbound ("a", 1)},
+                                    TVar {contents = Unbound ("a", 1)}, {level_old = 1; level_new = 1}))
+                            (top_type_check (Lambda ("x", Let ("y",Variable"x", Variable"y"))))
+
+    let suite =
+      "suite">:::
+        ["test1">:: test1;
+         "test2">:: test2]
+  end
+
+let suite = OUnit2.test_list [Test_lexer.suite; Test_inference.suite]
+let () = OUnit2.run_test_tt_main suite
