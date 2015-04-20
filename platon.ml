@@ -15,9 +15,7 @@ let () =
     Llvm.dump_module the_module
   end
 
-
 let id = Ast.L0.Term.Lambda ("x", Ast.L0.Term.Variable"x");;
-
 
 let suite = OUnit2.test_list [Test_lexer.suite; Test_inference.suite]
 let () = OUnit2.run_test_tt_main suite

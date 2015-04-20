@@ -34,11 +34,13 @@ module L0 = struct
 end
 module L1 = struct
   module Type = struct
+    type arity = int
     type base =
       | Double
       | Integer
     type t =
       | Base of base
+      | TypeCon of type_constructor * arity * base
       | Arrow of t * t
   end
   module Term = struct
