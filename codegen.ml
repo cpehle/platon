@@ -8,6 +8,8 @@ type codegen_state = {
   named_values : (string, Llvm.llvalue) Hashtbl.t;
 }
 
+let translate_type = fun ctx t -> 12
+
 let codegen_literal = fun ctx -> function
   | Ast.Term.Double d -> Llvm.const_float (Llvm.double_type ctx.llvm_context) d
   | Ast.Term.Integer i -> Llvm.const_int (Llvm.integer_type ctx.llvm_context 32) i
@@ -20,6 +22,7 @@ let rec codegen_term = fun ctx -> function
   | Ast.Term.Binary (op,t,x,y) ->
     let x' = codegen_term ctx x in
     let y' = codegen_term ctx y in
+    let llvm_ty = translate_type ctx t in
     begin
       match op with
       | "+" -> Llvm.build_fadd x' y' "addtmp" ctx.llvm_builder

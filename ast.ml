@@ -40,7 +40,6 @@ module L1 = struct
       | Integer
     type t =
       | Base of base
-      | TypeCon of type_constructor * arity * base
       | Arrow of t * t
   end
   module Term = struct
@@ -56,4 +55,15 @@ module L1 = struct
   end
   type proto = Prototype of string * string array
   type func = Function of proto * Term.t
-end
+
+  module PPrint = struct
+      let rec string_of_term : Term.t -> string = function
+        | Term.Variable v -> v
+        | Term.Binary (op,ty,e1,e2) -> "(" ^ string_of_term e1 ^ op ^ string_of_term e2 ^ ")"
+        | Term.Call (f,args) -> ""
+        | Term.Literal l -> string_of_literal l
+      and string_of_literal : Term.literal -> string = function
+        | Term.Double d -> string_of_float d
+        | Term.Integer i -> string_of_int i
+    end
+  end

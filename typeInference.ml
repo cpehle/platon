@@ -85,8 +85,8 @@ let rec unify : type_inference_state -> Type.t -> Type.t -> unit =
         else tv2 := Type.Link t1
       | (Type.TVar ({contents = Type.Unbound (_,l)} as tv),t')
       | (t', Type.TVar ({contents = Type.Unbound (_,l)} as tv)) ->
-	update_level s l t';
-        tv := Type.Link t'
+	       update_level s l t';
+         tv := Type.Link t'
       | (Type.TArrow (tyl1, tyl2,ll), Type.TArrow (tyr1, tyr2, lr)) ->
 	if ll.Type.level_new = Type.marked_level || lr.Type.level_new = Type.marked_level then
 	  failwith "cycle: occurs check.";
