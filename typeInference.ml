@@ -2,33 +2,31 @@ open Ast.L0
 
 type varname = string
 type env = (varname * Type.t) list
+
+
 type type_inference_state = {
   mutable gensym_counter : int;
   mutable current_level  : int;
   mutable to_be_level_adjusted : Type.t list;
-}
+  }
 
-let reset_gensym : type_inference_state -> unit =
-  fun s -> s.gensym_counter <- 0
-let reset_level : type_inference_state -> unit =
-  fun s -> s.current_level <- 1
-let reset_level_adjustment : type_inference_state -> unit =
-  fun s -> s.to_be_level_adjusted <- []
-let reset_type_inference_state : type_inference_state -> unit =
-  fun s -> reset_level s; reset_gensym s
-let enter_level : type_inference_state -> unit =
-  fun s -> s.current_level <- s.current_level + 1
-let leave_level : type_inference_state -> unit =
-  fun s -> s.current_level <- s.current_level - 1
-let gensym : type_inference_state -> string = fun s ->
+let reset_gensym (s : type_inference_state) = s.gensym_counter <- 0
+let reset_level (s : type_inference_state) = s.current_level <- 1
+let reset_level_adjustment s = s.to_be_level_adjusted <- []
+let reset_type_inference_state s = reset_level s; reset_gensym s
+let enter_level s = s.current_level <- s.current_level + 1
+let leave_level s = s.current_level <- s.current_level - 1
+let gensym s =
   let n = s.gensym_counter in
   s.gensym_counter <- s.gensym_counter + 1;
-  if n < 26 then String.make 1 (Char.chr (Char.code 'a' + n))
-  else "t" ^ string_of_int n
-let new_var : type_inference_state -> Type.t =
-  fun s -> Type.TVar (ref (Type.Unbound (gensym s, s.current_level)))
-let new_arrow : type_inference_state -> Type.t -> Type.t -> Type.t =
-  fun s ty1 ty2 -> Type.TArrow (ty1, ty2, {Type.level_new = s.current_level; Type.level_old = s.current_level})
+  if n < 26 then
+    String.make 1 (Char.chr (Char.code 'a' + n))
+  else
+    "t" ^ string_of_int n
+
+
+let new_var s = Type.TVar (ref (Type.Unbound (gensym s, s.current_level)))
+let new_arrow s t1 t2 = Type.TArrow (t1, t2, {Type.level_new = s.current_level; Type.level_old = s.current_level})
 
 (* Chase the links of bound variables, returning either a free
    variable or a constructed type. OCaml's typing/btype.ml has the

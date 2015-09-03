@@ -32,4 +32,15 @@ let bump (ps:pstate) : unit =
 
 let expect (ps:pstate) (t:Token.t) : unit =
   let p = peek ps in
-  if p == t then bump ps else assert false
+  if p == t then bump ps else
+    let msg = ("Expected " ^ Token.string_of_token t ^ " found " ^ Token.string_of_token p) in
+    begin
+      print_string msg;
+      assert false
+    end
+
+
+let parse_ident (ps:pstate) : Ast.L0.Term.t =
+  match peek ps with
+    Token.IDENT id -> (bump ps; Ast.L0.Term.Variable id)
+  | _ -> assert false
