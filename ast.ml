@@ -6,6 +6,11 @@ module L0 = struct
       | Application of t * t
       | Lambda of varname * t
       | Let of varname * t * t
+
+    let var x = Variable x
+    let app t t' = Application (t, t')
+    let lam v t = Lambda (v,t)
+    let let_ v t t'  = Let (v,t,t')
   end
   module Type = struct
     type qname = string
@@ -19,16 +24,19 @@ module L0 = struct
     and tv = Unbound of string * level | Link of t
     and levels = { mutable level_old : level; mutable level_new : level }
   end
-
+  module Module = struct
+    type t =
+      | Module of Term.t list
+  end
   module PPrint = struct
     let rec string_of_term : Term.t -> string = function
       | Term.Variable v -> v
       | Term.Application (e,e') -> (string_of_term e) ^ " " ^ (string_of_term e')
       | Term.Lambda (v,e) -> "fn " ^ v ^ " . " ^ (string_of_term e)
-      | Term.Let (v,e,e') -> "let " ^ v ^ " = " ^ (string_of_term e) ^ " . " ^ (string_of_term e')
+      | Term.Let (v,e,e') -> "let " ^ v ^ " = " ^ (string_of_term e) ^ " in " ^ (string_of_term e')
     let rec string_of_type : Type.t -> string = function
       | Type.TVar v -> assert false
-      | Type.QVar v -> assert false
+      | Type.QVar v -> v
       | Type.TArrow (t,t',l) -> (string_of_type t) ^ "->" ^ (string_of_type t')
   end
 end
@@ -65,5 +73,7 @@ module L1 = struct
       and string_of_literal : Term.literal -> string = function
         | Term.Double d -> string_of_float d
         | Term.Integer i -> string_of_int i
+      let string_of_func : func -> string = function
+        | Function (Prototype (s, ss), t) -> s ^ "[" ^ String.concat " " (Array.to_list ss) ^ "]" ^ "->" ^ string_of_term t
     end
   end

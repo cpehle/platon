@@ -24,7 +24,6 @@ let gensym s =
   else
     "t" ^ string_of_int n
 
-
 let new_var s = Type.TVar (ref (Type.Unbound (gensym s, s.current_level)))
 let new_arrow s t1 t2 = Type.TArrow (t1, t2, {Type.level_new = s.current_level; Type.level_old = s.current_level})
 
@@ -86,16 +85,17 @@ let rec unify : type_inference_state -> Type.t -> Type.t -> unit =
 	       update_level s l t';
          tv := Type.Link t'
       | (Type.TArrow (tyl1, tyl2,ll), Type.TArrow (tyr1, tyr2, lr)) ->
-	if ll.Type.level_new = Type.marked_level || lr.Type.level_new = Type.marked_level then
-	  failwith "cycle: occurs check.";
-	let min_level = min ll.Type.level_new lr.Type.level_new in
-	ll.Type.level_new <- Type.marked_level;
-        lr.Type.level_new <- Type.marked_level;
-	unify_lev s min_level tyl1 tyr1;
-	unify_lev s min_level tyl2 tyr2;
-	ll.Type.level_new <- min_level; lr.Type.level_new <- min_level
+         if ll.Type.level_new = Type.marked_level || lr.Type.level_new = Type.marked_level then
+           failwith "cycle: occurs check.";
+         let min_level = min ll.Type.level_new lr.Type.level_new in
+         ll.Type.level_new <- Type.marked_level;
+         lr.Type.level_new <- Type.marked_level;
+         unify_level s min_level tyl1 tyr1;
+         unify_level s min_level tyl2 tyr2;
+         ll.Type.level_new <- min_level;
+         lr.Type.level_new <- min_level
       | _ -> assert false
-and unify_lev s l ty1 ty2 =
+and unify_level s l ty1 ty2 =
   let ty1 = repr ty1 in
   update_level s l ty1;
   unify s ty1 ty2
@@ -139,7 +139,7 @@ let gen : type_inference_state -> Type.t -> unit = fun s ty ->
     | _ -> ()
   in loop ty
 
-let inst : type_inference_state -> Type.t -> Type.t =
+let instantiate : type_inference_state -> Type.t -> Type.t =
   let rec loop s subst = function
     | Type.TVar {contents = Type.Unbound (name,l)} when l = Type.generic_level ->
       begin
@@ -158,7 +158,7 @@ let inst : type_inference_state -> Type.t -> Type.t =
 
 let rec typeof : type_inference_state -> env -> Term.t -> Type.t =
   fun s env -> function
-    | Term.Variable x -> inst s (List.assoc x env)
+    | Term.Variable x -> instantiate s (List.assoc x env)
     | Term.Lambda (x,e) ->
       let ty_x = new_var s in
       let ty_e = typeof s ((x,ty_x)::env) e in

@@ -36,13 +36,13 @@ let test1 text_ctxt = assert_equal
                    TVar {contents = Unbound ("e", 1)}, {level_old = 1; level_new = 1}),
            {level_old = 1; level_new = 1}),
         {level_old = 1; level_new = 1}))
-    (  top_type_check (Lambda ("x", Lambda ("y",Let ("x",Application (Variable"x",Variable"y"),
-                                                     Lambda ("x",Application (Variable"y",Variable"x"))))))
+    (  top_type_check (Lambda ("x", Lambda ("y",Let ("x",Application (Variable ("x"),Variable ("y")),
+                                                     Lambda ("x",Application (Variable ("y"), Variable ("x")))))))
     )
 let test2 text_ctxt = assert_equal
     (TArrow (TVar {contents = Unbound ("a", 1)},
              TVar {contents = Unbound ("a", 1)}, {level_old = 1; level_new = 1}))
-    (top_type_check (Lambda ("x", Let ("y",Variable"x", Variable"y"))))
+    (top_type_check (Lambda ("x", Let ("y", Variable ("x"), Variable ("y")))))
 
 let suite =
   "test_inference">:::

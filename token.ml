@@ -12,6 +12,7 @@ type t = LET
        | IN
        | COMMA
        | IDENT of string
+       | STRING of string
        | ARROW
        | EQUALS
        | FUN
@@ -38,7 +39,7 @@ let string_of_token t = match t with
                     | IDENT s -> "identifier"
                     | ARROW -> "->"
                     | EQUALS -> "="
-                    | FUN -> "fn"
+                    | FUN -> "fun"
                     | EOF -> "end of file"
                     | MINUS -> "-"
                     | PLUS -> "+"

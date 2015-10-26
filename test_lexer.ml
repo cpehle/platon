@@ -11,7 +11,7 @@ let test_cases = [
     ("  \t\n\n\t\r\n\r", Ok []);
     ("())in,let_ _1Ma->==",
      Ok [LPAREN; RPAREN; RPAREN; IN; COMMA; IDENT "let_"; IDENT "_1Ma"; ARROW; EQUALS; EQUALS]);
-    ("let fun in", Ok [LET; FUN; IN]);
+    ("let fn in", Ok [LET; FUN; IN]);
     (";", Fail);
     ("~", Fail);
     ("forall", Ok [FORALL]);
