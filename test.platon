@@ -1,3 +1,8 @@
+-- This is a comment
 let x = y in z
-let z = x in p
+-- This is a another comment
+let z = x in p -- in the same line as source code.
 let g = d in q
+
+     
+

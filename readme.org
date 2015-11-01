@@ -5,21 +5,18 @@ with support for unconventional programming models. The default
 implementation is not a monolithic compiler but is structured around a
 meta language for program transformation and symbolic computation.
 
-
 ** Optimization
 
 - read paper on Stratego
 - optimization via saturation (machine learning applied to optimization)
 - need well defined notion of program equivalence and then introduce stochastic walk in space of possible equivalent programs
+- whole program optimization and transformation
 - see corelets in fftw
-- pipelines
+- pipelines (optimization of pipelines by partial evaluation)
 - partial evaluation
 - shift between compile time and evaluation time
 - hotspot JIT
-- dynamic data / code locallity improvement (i.e. learn access patterns and optimize for them
-
-)
-
+- dynamic data / code locallity improvement (i.e. learn access patterns and optimize for them)
 
 ** Features
 
@@ -58,10 +55,25 @@ Investigate the following computational model:
   state that is computed from lower and higher order information, faces
   and so on can split and merge, etc.
 
+Take inspiration from Biology:
 
-
+- Message passing / signaling, very complex activation and reaction chains,
+  separation of compuation "domains", that is cells. Nesting of cells within cells.
+  Asynchronous continuous time behaviour.
+- Investigate different discretetization algorithms
+- Take it as an inspiration for system design: Separation of concern
+  fault tolerance etc.
+- Use it as an inspiration for describing computations that take
+  "energy" and to dynamically schedule different processes, as
+  inspiration for generalized state machines
 
 ** Use Cases
+
+Model language requirements after use cases. Generally speaking I
+think all use cases can only be met if it is easy to extend the
+language and write domain specific languages in it (see Haskell,
+Fortress, work by VPRI as examples)
+
 *** Systems Programming
 
 Support for state machines / protocols as seen in the Singular# language.

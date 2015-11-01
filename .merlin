@@ -1,2 +1,2 @@
 B _build
-PKG llvm oUnit llvm.scalar_opts llvm.executionengine core
+PKG llvm oUnit llvm.scalar_opts llvm.executionengine core core_extended tsdl

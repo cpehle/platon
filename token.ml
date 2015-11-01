@@ -1,3 +1,5 @@
+open Core.Std
+
 type t = LET
        | RPAREN
        | LPAREN
@@ -5,12 +7,20 @@ type t = LET
        | RBRACKET
        | LBRACE
        | RBRACE
+       | TINT
+       | TBOOL
+       | IF
+       | THEN
+       | ELSE
        | DOT
        | FORALL
        | MATCH
        | MODULE
        | IN
+       | WHERE
        | COMMA
+       | INT of Int64.t
+       | FLOAT of float
        | IDENT of string
        | STRING of string
        | ARROW
@@ -22,7 +32,7 @@ type t = LET
        | PIPE
        | COLON
 
-let string_of_token t = match t with
+let to_string t = match t with
                     | LET -> "let"
                     | RPAREN -> ")"
                     | LPAREN -> "("
@@ -31,10 +41,18 @@ let string_of_token t = match t with
                     | LBRACE -> "{"
                     | RBRACE -> "}"
                     | DOT -> "."
+                    | IF -> "if"
+                    | THEN -> "then"
+                    | ELSE -> "else"
+                    | TINT -> "int"
+                    | TBOOL -> "bool"
+                    | STRING s -> "\"" ^ s ^ "\""
                     | FORALL -> "forall"
                     | MATCH -> "match"
                     | MODULE -> "module"
                     | IN -> "in"
+                    | FLOAT f -> Float.to_string f
+                    | INT i -> Int64.to_string i
                     | COMMA -> ","
                     | IDENT s -> "identifier"
                     | ARROW -> "->"

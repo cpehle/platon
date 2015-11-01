@@ -1,16 +1,36 @@
-include Core.Std
+open Core.Std
 
 type filename = string
-type position = filename * int * int
-type pstate =
-  { mutable pstate_peek  : Token.t;
-    mutable pstate_ctxt  : (string * position) list;
-    mutable pstate_depth : int;
-    pstate_lexbuf        : Lexing.lexbuf;
-    pstate_file          : filename; }
+type error_msg = string
+
+type env =
+  {
+    mutable env_peek  : (Token.t, Parse_error.t * Position.t) Result.t;
+    mutable env_depth : int;
+    on_error : (env -> Error.t -> unit) option;
+    env_lexbuf        : Lexing.lexbuf;
+    env_file          : filename; }
+
+let make_parser_from_string  (s:string) : env =
+  let lexbuf = Lexing.from_string s in
+  let source_position = { lexbuf.Lexing.lex_start_p with Lexing.pos_fname = "(interactive)" } in
+  let current_position = { lexbuf.Lexing.lex_curr_p with Lexing.pos_fname = "(interactive)" } in
+  lexbuf.Lexing.lex_start_p <- source_position;
+  lexbuf.Lexing.lex_curr_p <- current_position;
+  let first_token = Lexer.token lexbuf in
+  let ps = {
+
+      on_error = None;
+      env_peek   = first_token;
+
+      env_depth  = 0;
+      env_lexbuf = lexbuf;
+      env_file   = "interactive";
+    } in
+  ps
 
 let make_parser
-      (fname:string) : pstate =
+      (fname:string) : env =
   let lexbuf = Lexing.from_channel (open_in fname) in
   let source_position = { lexbuf.Lexing.lex_start_p with Lexing.pos_fname = fname } in
   let current_position = { lexbuf.Lexing.lex_curr_p with Lexing.pos_fname = fname } in
@@ -18,87 +38,119 @@ let make_parser
   lexbuf.Lexing.lex_curr_p <- current_position;
   let first_token = Lexer.token lexbuf in
   let ps = {
-      pstate_peek   = first_token;
-      pstate_ctxt   = [];
-      pstate_depth  = 0;
-      pstate_lexbuf = lexbuf;
-      pstate_file   = fname;
+      on_error = None;
+      env_peek   = first_token;
+      env_depth  = 0;
+      env_lexbuf = lexbuf;
+      env_file   = fname;
     } in
   ps
 
-let peek (ps:pstate) : Token.t =
-  ps.pstate_peek
+let peek (ps:env) : (Token.t, Parse_error.t * Position.t) Result.t =
+  ps.env_peek
 
-let bump (ps:pstate) : unit =
-  ps.pstate_peek <- Lexer.token ps.pstate_lexbuf
+let bump (ps:env) : unit =
+  ps.env_peek <- Lexer.token ps.env_lexbuf
 
-let expect (ps:pstate) (t:Token.t) : unit =
-  let p = peek ps in
-  if phys_equal p t then bump ps else
-    let msg = ("Expected " ^ Token.string_of_token t ^ " found " ^ Token.string_of_token p) in
-    begin
-      print_string msg;
-    end
+let expect (ps:env) (t:Token.t) : (unit, Parse_error.t * Position.t) Result.t =
+  let open Result.Monad_infix in
+  peek ps >>= fun token ->
+  if phys_equal token t
+     then let () = bump ps in Result.return ()
+     else Result.Error (Parse_error.UnexpectedTokenExpected (token, t), Position.default_position)
 
-let parse_ident (ps:pstate) : Ast.L0.Term.t =
-  let token = peek ps in
+let ident (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
+  let open Result.Monad_infix in
+  peek ps >>= fun token ->
   match token with
-  | Token.IDENT id ->
-     bump ps;
-     Ast.L0.Term.Variable id
-  | _ -> let msg = ("Expected identifier found " ^ Token.string_of_token token)  ^ "\n" in
-         begin
-           print_string msg;
-           assert false
-         end
+      | Token.IDENT id -> let _ = bump ps in
+                          Result.return (Ast.L0.Term.Variable id)
+      | _ as token -> Result.Error (Parse_error.UnexpectedTokenWithExpectation (Token.to_string token, "identifier"), Position.default_position)
 
-let rec parse_term (ps:pstate) : Ast.L0.Term.t = match peek ps with
+
+let rec ptype (ps:env) : (Ast.L0.Type.t, Parse_error.t * Position.t) Result.t =
+  let open Result.Monad_infix in
+  peek ps >>= fun token -> match token with
+  | Token.IDENT s -> ptype0 (Ast.L0.Type.QVar s) ps
+  | Token.LPAREN ->
+     ptype ps >>= fun t ->
+     expect ps Token.LPAREN >>= fun _ ->
+     Result.return t
+  | _ as token -> Result.Error (Parse_error.UnexpectedToken (Token.to_string token), Position.default_position)
+and ptype0 t1 ps =
+  let open Result in
+  let open Result.Monad_infix in
+  peek ps >>= fun token -> match token with
+                           | Token.ARROW ->
+                              ptype ps >>= fun t2 -> return  (Ast.L0.Type.TArrow (t1, t2, Ast.L0.Type.default_levels))
+                           | _ -> return t1
+
+let rec term (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
+  let open Result in
+  let open Result.Monad_infix in
+  peek ps >>= fun token -> match token with
   |  Token.IDENT id ->
       bump ps;
-      Ast.L0.Term.Variable id
+      return  (Ast.L0.Term.Variable id)
   | Token.LPAREN ->
-     let tm = parse_term ps in
-     expect ps Token.RPAREN;
-     tm
+     term ps >>= fun tm ->
+     expect ps Token.RPAREN >>=  fun _ ->
+     return tm
   | Token.RBRACE ->
-     let tm = parse_term ps in
-     expect ps Token.RBRACE;
-     tm
+     term ps >>= fun tm ->
+     expect ps Token.RBRACE >>= fun _ ->
+     Result.return tm
   | Token.RBRACKET ->
-     let tm = parse_term ps in
-     expect ps Token.RBRACKET;
-     tm
-  | Token.LET -> parse_let ps
-  | Token.FUN -> parse_fun ps
-  | _ -> assert false
-and parse_application (ps:pstate) : Ast.L0.Term.t =
-  let fn = parse_ident ps in
-  let var = parse_ident ps in
-  Ast.L0.Term.Application (fn, var)
+     term ps >>= fun tm ->
+     expect ps Token.RBRACKET >>= fun _ ->
+     return tm
+  | Token.LET -> plet ps
+  | Token.FUN -> pfun ps
+  | Token.FLOAT f -> Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Float f))
+  | Token.INT i ->  Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Int i))
+  | _ as t -> Error (Parse_error.UnexpectedToken (Token.to_string t), Position.default_position)
 
-and parse_let (ps:pstate) : Ast.L0.Term.t =
-  expect ps (Token.LET);
-  let Ast.L0.Term.Variable v = parse_ident ps in
-  expect ps (Token.EQUALS);
-  let term = parse_term ps in
-  expect ps (Token.IN);
-  let body = parse_term ps in
-  Ast.L0.Term.Let (v, term, body)
-and parse_fun (ps:pstate) : Ast.L0.Term.t =
-  expect ps (Token.FUN);
-  let Ast.L0.Term.Variable v = parse_ident ps in
-  expect ps (Token.ARROW);
-  let term = parse_term ps in
-  Ast.L0.Term.Lambda (v, term)
 
-let rec parse_term_list (ps:pstate) (tl:Ast.L0.Term.t list) (tok : Token.t) : Ast.L0.Term.t list =
-  let token = peek ps in
-  if token = tok then tl else
-    let tm = parse_term ps in
+and application (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
+  let open Result.Monad_infix in
+  ident ps >>= fun fn ->
+  ident ps >>= fun var ->
+  Result.return (Ast.L0.Term.Application (fn, var))
+
+and plet (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
+  let open Result.Monad_infix in
+  expect ps (Token.LET) >>= fun _ ->
+  ident ps >>= function
+  | (Ast.L0.Term.Variable v) ->
+     expect ps (Token.EQUALS) >>= fun _ ->
+     term ps >>= fun tm ->
+     expect ps (Token.IN) >>= fun _ ->
+     term ps >>= fun body ->
+     Result.return (Ast.L0.Term.Let (v, tm, body))
+  | _ -> Result.Error (Parse_error.InternalError, Position.default_position)
+
+and pfun (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
+  let open Result.Monad_infix in
+  expect ps (Token.FUN) >>= fun _ ->
+  ident ps >>= function
+  | Ast.L0.Term.Variable v ->
+     expect ps (Token.DOT) >>= fun _ ->
+     term ps >>= fun tm ->
+     Result.return (Ast.L0.Term.Lambda (v, tm))
+  | _  -> Result.Error (Parse_error.InternalError, Position.default_position)
+
+let rec term_list (ps:env) end_token tl =
+  let open Result.Monad_infix in
+  peek ps >>= fun token ->
+  if token = end_token
+  then Result.return tl
+  else
+    term ps >>= fun tm ->
     let tl = List.append  tl  [tm] in
-    parse_term_list ps tl tok
+    term_list ps end_token tl
 
-let rec parse_module (ps:pstate) : Ast.L0.Module.t =
-  expect ps (Token.MODULE);
-  let tl = parse_term_list ps [] Token.EOF in
-  Ast.L0.Module.Module tl
+let rec pmodule (ps:env) =
+  let open Result.Monad_infix in
+  expect ps (Token.MODULE) >>= fun _ ->
+  term_list ps Token.EOF []  >>= fun tl ->
+  Result.return (Ast.L0.Module.Module tl)

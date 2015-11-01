@@ -1,11 +1,14 @@
-include Core.Std
+open Core.Std
+open Core_extended.Color_print
+open Core_extended.Readline
+
+
 
 let () =
   let module Ast = Ast.L1 in
   let f = Ast.Function (Ast.Prototype ("square", [| "x" |]),
-           Ast.Term.Binary ("*", Ast.Type.Base Ast.Type.Double, Ast.Term.Variable "x", Ast.Term.Variable "x")) in
+                        Ast.Term.Binary ("*", Ast.Type.Base Ast.Type.Double, Ast.Term.Variable "x", Ast.Term.Variable "x")) in
   let context = Llvm.global_context () in
-
   let the_module = Llvm.create_module context "platon" in
   let builder = Llvm.builder context in
   let l = Codegen.codegen_function {
@@ -31,6 +34,24 @@ let () =
 let id = Ast.L0.Term.Lambda ("x", Ast.L0.Term.Variable ("x"));;
 
 let suite = OUnit2.test_list [Test_lexer.suite; Test_inference.suite; Test_parser.suite]
-let () = begin
-    OUnit2.run_test_tt_main suite;
-  end
+let () =
+  let open Result.Monad_infix in
+  let rec loop = fun () ->
+   let res = input_line () in
+   match res with
+   | None -> ()
+   | Some s ->
+      let ps = Parser.make_parser_from_string s in
+      match Parser.term ps with
+      | Result.Ok tm ->
+         printf "%s\n" (Ast.L0.Term.to_string tm);
+         loop ()
+      | Result.Error (err, (fn, l, c)) ->
+         printf "%s:%i %i %s\n" fn l c (Parse_error.to_string err);
+         loop ()
+  in begin
+      colorprintf ~color:`Orchid "Running tests...\n";
+      print_string (Parse_error.mark_string "This is a test." 2 3);
+      loop ();
+      OUnit2.run_test_tt_main suite;
+    end
