@@ -8,11 +8,11 @@ let test_cases = [
     ("())in,let_ _1Ma->==",
     Result.Ok [LPAREN; RPAREN; RPAREN; IN; COMMA; IDENT "let_"; IDENT "_1Ma"; ARROW; EQUALS; EQUALS]);
     ("let fn in", Result.Ok [LET; FUN; IN]);
-    (* (";", Result.Error ); *)
-    (* ("~", Fail); *)
-    (* ("forall", Ok [FORALL]); *)
-    (* ("module", Ok [MODULE]); *)
-    (* ("12312313 12.32 \"string\"", Ok [INT (Int64.of_int 12312313); FLOAT 12.32; STRING "string"]) *)
+    (";", Result.Error ());
+    ("~", Result.Error ());
+    ("forall", Result.Ok [FORALL]);
+    ("module", Result.Ok [MODULE]);
+    ("12312313 12.32 \"string\"", Result.Ok [INT (Int64.of_int 12312313); FLOAT 12.32; STRING "string"])
   ]
 
 

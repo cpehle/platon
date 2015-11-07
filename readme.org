@@ -1,9 +1,11 @@
 * Platon
 
-Platon aims to be a general purpose extensible programming language
-with support for unconventional programming models. The default
-implementation is not a monolithic compiler but is structured around a
-meta language for program transformation and symbolic computation.
+Platon aims to be a general purpose programming language that is
+extensible and supports unconventional programming models. 
+
+The current implementation is not a monolithic compiler, but is
+structured around a meta language for program transformation and
+symbolic computation.
 
 ** Optimization
 
@@ -67,6 +69,7 @@ Take inspiration from Biology:
   "energy" and to dynamically schedule different processes, as
   inspiration for generalized state machines
 
+
 ** Use Cases
 
 Model language requirements after use cases. Generally speaking I
@@ -78,9 +81,17 @@ Fortress, work by VPRI as examples)
 
 Support for state machines / protocols as seen in the Singular# language.
 
+
 *** Computer Algebra
 
+
+
 *** Numerical code
+Besides what Fortran covers exceptionally well, in principle one need
+both support for heterogenous memory architectures (see Languages like
+Chapel..), that is "domains of computation", aswell as message
+passing. More importantly there should also be good support for High
+Performance Computing with non-homogenous data.
 
 *** Graphics
 

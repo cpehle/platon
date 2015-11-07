@@ -55,7 +55,7 @@ let rec codegen_term = fun context -> function
     Llvm.build_call callee args "calltmp" context.llbuilder
 
 let codegen_proto = fun context -> function
-  | Source.Prototype (name,args) ->
+  | Source.Term.Prototype (name,args) ->
     let doubles = Array.create ~len:(Array.length args) (Llvm.double_type context.llcontext) in
     let ft = Llvm.function_type (Llvm.double_type context.llcontext) doubles in
     let f =
@@ -77,7 +77,7 @@ let codegen_proto = fun context -> function
     f
 
 let codegen_function context = function
-  | Source.Function (proto, body) ->
+  | Source.Term.Function (proto, body) ->
     Hashtbl.clear context.named_values;
     let the_function = codegen_proto context proto in
     let bb = Llvm.append_block context.llcontext "entry" the_function in

@@ -2,11 +2,9 @@ open Core.Std
 open Core_extended.Color_print
 open Core_extended.Readline
 
-
-
 let () =
   let module Ast = Ast.L1 in
-  let f = Ast.Function (Ast.Prototype ("square", [| "x" |]),
+  let f = Ast.Term.Function (Ast.Term.Prototype ("square", [| "x" |]),
                         Ast.Term.Binary ("*", Ast.Type.Base Ast.Type.Double, Ast.Term.Variable "x", Ast.Term.Variable "x")) in
   let context = Llvm.global_context () in
   let the_module = Llvm.create_module context "platon" in
@@ -37,7 +35,7 @@ let suite = OUnit2.test_list [Test_lexer.suite; Test_inference.suite; Test_parse
 let () =
   let open Result.Monad_infix in
   let rec loop = fun () ->
-   let res = input_line () in
+   let res = input_line ~prompt:">>> " () in
    match res with
    | None -> ()
    | Some s ->

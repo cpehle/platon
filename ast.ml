@@ -1,5 +1,5 @@
 open Core.Std
-
+(*
 module type IDENT = sig
   type t
   val create: string -> t
@@ -26,6 +26,15 @@ module Ident : IDENT = struct
        if equal id1 id2 then data else find id1 rem
 end
 
+
+
+module type SUBST = sig
+  type t
+  val identity: t
+  val add: Ident.t -> path -> t -> t val path: path -> t -> path
+end *)
+
+
 module L0 = struct
   module Term = struct
     type varname = string
@@ -34,7 +43,6 @@ module L0 = struct
       | Float of float
       | Int of Int64.t
       | String of string
-
       let to_string = function
         | Float f -> Float.to_string f
         | Int i -> Int64.to_string i
@@ -59,6 +67,32 @@ module L0 = struct
     let lam v t = Lambda (v,t)
     let let_ v t t'  = Let (v,t,t')
   end
+  (* module Relation = struct *)
+  (*   type constant = string *)
+  (*   type variable = { name : Core.Std.String.t; level : Core.Std.Int.t} *)
+  (*   type t = *)
+  (*     | Var of variable *)
+  (*     | Const of constant *)
+  (*     | App of constant * t Core.Std.List.t *)
+  (*   type atom = constant * t Core.Std.List.t *)
+  (*   type clause = atom Core.Std.List.t *)
+  (*   type assertion = atom * clause *)
+
+  (*   let compare_var { name = vn; level = vl } { name = vn'; level = vl' } = *)
+  (*     let cs = (String.compare vn vn') in if (cs = 0) then Int.compare vl vl' else cs *)
+
+
+
+  (*   type environment = (variable,  t) Core.Std.Map.t *)
+
+  (*   type database = assertion Core.Std.List.t *)
+  (*   let rec subst_relation env = function *)
+  (*     | Var x as e -> *)
+  (*        (let e' = Core.Std.String.Map.find env x in *)
+  (*         if e = e' then e' else subst_relation env e') *)
+  (*     | Const _ as e -> e *)
+  (*     | App (c, ls) -> App (c, List.map ~f:(subst_relation env)) *)
+  (* end *)
   module Type = struct
     type qname = string
     type level = int
@@ -81,13 +115,7 @@ module L0 = struct
 
   module Module = struct
     type t =
-      | Module of Term.t list
-  end
-  module Declaration = struct
-    type t =
-      | Module of Module.t
-      | Type of string * Type.t
-      | Term of string * Term.t
+      | Module of Term.t * Term.t list
   end
 end
 
@@ -103,6 +131,7 @@ module L1 = struct
   end
   module Term = struct
     type varname = string
+
     type literal =
       | Double of float
       | Integer of int
@@ -111,20 +140,19 @@ module L1 = struct
       | Variable of varname
       | Binary of string * Type.t * t * t
       | Call of string * t array
-  end
-  type proto = Prototype of string * string array
-  type func = Function of proto * Term.t
+    type proto = Prototype of string * string array
+    type func = Function of proto * t
 
-  module PPrint = struct
-      let rec string_of_term : Term.t -> string = function
-        | Term.Variable v -> v
-        | Term.Binary (op,ty,e1,e2) -> "(" ^ string_of_term e1 ^ op ^ string_of_term e2 ^ ")"
-        | Term.Call (f,args) -> ""
-        | Term.Literal l -> string_of_literal l
-      and string_of_literal : Term.literal -> string = function
-        | Term.Double d -> Float.to_string d
-        | Term.Integer i -> string_of_int i
-      let string_of_func : func -> string = function
-        | Function (Prototype (s, ss), t) -> s ^ "[" ^ String.concat ~sep:" " (Array.to_list ss) ^ "]" ^ "->" ^ string_of_term t
-    end
+    let rec to_string : t -> string = function
+      | Variable v -> v
+      | Binary (op,ty,e1,e2) -> "(" ^ to_string e1 ^ op ^ to_string e2 ^ ")"
+      | Call (f,args) -> ""
+      | Literal l -> string_of_literal l
+    and string_of_literal : literal -> string = function
+      | Double d -> Float.to_string d
+      | Integer i -> string_of_int i
+    let string_of_func : func -> string = function
+      | Function (Prototype (s, ss), t) -> s ^ "[" ^ String.concat ~sep:" " (Array.to_list ss) ^ "]" ^ "->" ^ to_string t
   end
+
+end
