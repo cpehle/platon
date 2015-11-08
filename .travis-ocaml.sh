@@ -6,7 +6,7 @@ echo $PATH
 
 opam init -a ${BASE_REMOTE} --comp=4.02.3
 eval $(opam config env)
-opam install depext
+opam install -y depext
 opam --version
 opam --git-version
 # install dependencies
