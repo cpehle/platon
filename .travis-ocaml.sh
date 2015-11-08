@@ -58,7 +58,7 @@ opam --version
 opam --git-version
 
 # install dependencies
-! [ -z "$DEPS" ] && opam install $M31_DEPS
+! [ -z "$DEPS" ] && opam install $DEPS
 
 # run
 ${BUILD_CMD}
