@@ -2,9 +2,9 @@ language: c
 sudo: false
 install: true
 before_script:
-  - wget https://github.com/ocaml/opam/releases/download/1.2.2/opam-1.2.2-x86_64-Linux -O /tmp/opam.tar.gz
-  - tar -xvf /tmp/opam.tar.gz
-  - export PATH=$PATH:$PWD/opam/bin/
+  - mkdir bin
+  - wget https://github.com/ocaml/opam/releases/download/1.2.2/opam-1.2.2-x86_64-Linux -O $PWD/bin/opam
+  - export PATH=$PATH:$PWD/bin/
 
 script: bash -ex .travis-ocaml.sh
 env:
