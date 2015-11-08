@@ -54,6 +54,7 @@ let () =
   in begin
       colorprintf ~color:`Orchid "Running tests...\n";
       print_string (Parse_error.mark_string "This is a test." 2 3);
-      loop ();
+      print_string (Parse_error.mark_string "This is a test." 0 4);
       OUnit2.run_test_tt_main suite;
+      loop ();
     end
