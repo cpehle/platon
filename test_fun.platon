@@ -1,0 +1,2 @@
+let f = fn x . y in z
+let f = fn x . fn y . t in z

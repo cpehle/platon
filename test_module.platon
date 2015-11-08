@@ -1,0 +1,7 @@
+graph : module =
+   t : type
+   x : int = 2
+   y : int = 21
+   f = fn x -> x
+   g = fn x y z -> x z w
+

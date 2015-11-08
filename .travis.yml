@@ -1,0 +1,6 @@
+language: c
+sudo: required
+install: true
+script: bash -ex .travis-ocaml.sh
+env:
+  - DEPS="llvm core core_extended sedlex" BUILD_CMD="make"

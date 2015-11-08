@@ -36,4 +36,4 @@ let mark_string s from until =
   done;
   String.set mark from '^';
   String.set mark until '^';
-  String.concat ~sep:"\n" [s;mark]
+  (String.concat ~sep:"\n" [s;mark]) ^ "\n"

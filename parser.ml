@@ -55,7 +55,7 @@ let expect (ps:env) (t:Token.t) : (unit, Parse_error.t * Position.t) Result.t =
   peek ps >>= fun token ->
   if phys_equal token t
   then let () = bump ps in Result.return ()
-  else let pos =  (ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
+  else let pos =  (Option.some ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
        Result.Error (Parse_error.UnexpectedTokenExpected (token, t), pos)
 
 let ident (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
@@ -65,7 +65,7 @@ let ident (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
       | Token.IDENT id -> let _ = bump ps in
                           Result.return (Ast.L0.Term.Variable id)
       | _ as token ->
-         let pos =  (ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
+         let pos =  (Option.some ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
          Result.Error (Parse_error.UnexpectedTokenWithExpectation (Token.to_string token, "identifier"), pos)
 
 
@@ -79,7 +79,7 @@ let rec ptype (ps:env) : (Ast.L0.Type.t, Parse_error.t * Position.t) Result.t =
      expect ps Token.LPAREN >>= fun _ ->
      Result.return t
   | _ as token ->
-     let pos =  (ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
+     let pos =  (Option.some ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
      Result.Error (Parse_error.UnexpectedToken (Token.to_string token), pos)
 and ptype0 t1 ps =
   let open Result in
@@ -113,7 +113,7 @@ let rec term (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
   | Token.FLOAT f -> Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Float f))
   | Token.INT i ->  Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Int i))
   | _ as t ->
-     let pos =  (ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
+     let pos =  (Option.some ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
      Error (Parse_error.UnexpectedToken (Token.to_string t), pos)
 
 
@@ -134,7 +134,7 @@ and plet (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
      term ps >>= fun body ->
      Result.return (Ast.L0.Term.Let (v, tm, body))
   | _ ->
-     let pos =  (ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
+     let pos =  (Option.some ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
      Result.Error (Parse_error.InternalError, pos)
 (*
 varlist:
@@ -153,7 +153,7 @@ and pfun (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t) Result.t =
      term ps >>= fun tm ->
      Result.return (Ast.L0.Term.Lambda (v, tm))
   | _  ->
-     let pos =  (ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
+     let pos =  (Option.some ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_fname, ps.env_lexbuf.Lexing.lex_curr_p.Lexing.pos_lnum, 0) in
      Result.Error (Parse_error.InternalError, pos)
 
 let rec term_list (ps:env) end_token tl =

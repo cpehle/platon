@@ -9,7 +9,7 @@ let bounds lo c hi = (lo <= c) && (c <= hi)
 let fail lexbuf s : (Token.t, Parse_error.t * Position.t) Result.t =
     let p = lexbuf.Lexing.lex_start_p in
     let pos =
-      (p.Lexing.pos_fname,
+      (Option.some p.Lexing.pos_fname,
        p.Lexing.pos_lnum ,
        (p.Lexing.pos_cnum) - (p.Lexing.pos_bol))
     in

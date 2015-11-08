@@ -45,7 +45,11 @@ let () =
          printf "%s\n" (Ast.L0.Term.to_string tm);
          loop ()
       | Result.Error (err, (fn, l, c)) ->
-         printf "%s:%i %i %s\n" fn l c (Parse_error.to_string err);
+         let error = match fn with
+         | Some n -> sprintf "%s:%i %i %s\n" n l c (Parse_error.to_string err)
+         | None -> sprintf "%s:%i %i %s\n" "<interactive>" l c (Parse_error.to_string err)
+         in
+         print_string error;
          loop ()
   in begin
       colorprintf ~color:`Orchid "Running tests...\n";

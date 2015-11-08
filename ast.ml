@@ -34,6 +34,19 @@ module type SUBST = sig
   val add: Ident.t -> path -> t -> t val path: path -> t -> path
 end *)
 
+module Id = struct
+  let gen_id = ref 0;
+  type t = {
+      varname : string;
+      id : int;
+    }
+  let fresh = fun () ->
+    let id = gen_id.contents in
+    gen_id := gen_id.contents + 1;
+    { varname = "x"; id = id}
+end
+
+
 
 module L0 = struct
   module Term = struct
