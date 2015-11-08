@@ -10,7 +10,7 @@ opam install depext
 opam --version
 opam --git-version
 # install dependencies
-! [ -z "$DEPS" ] && opam install $DEPS
+! [ -z "$DEPS" ] && opam install -y $DEPS
 
 # run
 ${BUILD_CMD}
