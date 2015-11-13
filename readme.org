@@ -2,10 +2,85 @@
 
 Platon aims to be a general purpose programming language that is
 extensible and supports unconventional programming models. 
-
 The current implementation is not a monolithic compiler, but is
 structured around a meta language for program transformation and
 symbolic computation.
+
+One of the main distiguishing features is that platon is designed to
+support typed symbolic programming, similiarly to Magma. In contrast
+to magma it works over an arbitrary base monoidal category.
+
+Given a monoidal catgory $(M, \otimes, I)$ one can formulate a number
+of algebraic structures internal to the category $M$. A lot of them
+arise as functors from certain small categories into $M$.
+
+Zero cost abstractions (See for example HardCaml)
+
+
+
+
+
+
+Renormalization and convolutional neural networks
+
+
+Renormalization and mean field theory:
+
+
+
+
+
+
+
+
+Distinguish between generating functions and propagators and interactions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+** Develop Penrose's tensor calculus is full generality
+*** Investigate automatic differentiation as examples
+
+
+*** Study lisp / urbit as weird examples
+
+*** Study stack based languages as weird examples
+
+*** Study dataflow processor architectures
+
+*** Examples for "data flow" languages / monoidal categories
+- ChucK
+- Faust digital signal processing language
+- Quantum logic / Quantum information theory
+- Esterel
+- QFT
+- HDL
+- Sisal
+- TensorFlow
+- Biology modelling languages
+- React
+- Differential games
+
+** How does one encode the concept of Manifold / Space to do computation on?
+** Investigate scheduling / placement algorithms on heterogenous hardware
+
+* Inference over manifolds
+
+** Agents fibered over manifold connected by "signal net"
+
+
+
+
 
 ** Optimization
 

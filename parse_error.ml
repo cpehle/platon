@@ -1,4 +1,5 @@
 open Core.Std
+open Core_extended.Color_print
 
 type t =
     | LexError of string
@@ -30,10 +31,10 @@ let mark_string s from until =
   let strlen = String.length s in
   let mark = String.make strlen ' ' in
   if (0 <= from) && (from < until) && (until < strlen)
-  then
-  for i = from to until do
+  then for i = from to until do
     String.set mark i '~';
   done;
   String.set mark from '^';
   String.set mark until '^';
+  let mark =  color ~color:`Red mark in
   (String.concat ~sep:"\n" [s;mark]) ^ "\n"
