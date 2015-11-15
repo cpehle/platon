@@ -1,8 +1,6 @@
 include Core.Std
 module Source = Ast.L1
 
-exception Error of string
-
 type codegen_state = {
   llcontext : Llvm.llcontext;
   llmodule  : Llvm.llmodule;
@@ -17,7 +15,6 @@ let rec find_type_representation : codegen_state -> Source.Type.t -> Llvm.lltype
                                               (Llvm.double_type ctx.llcontext)
                                            | Source.Type.Integer -> (Llvm.integer_type ctx.llcontext 32) end
             | Source.Type.Arrow (t,t_) -> (Llvm.integer_type ctx.llcontext 32)
-
 
 let codegen_struct context array =
   Llvm.struct_type context array
@@ -66,21 +63,25 @@ and codegen_trace context var tm =
   (* Llvm.build_phi *)
   ctm
 
-let codegen_proto : codegen_state -> Ast.L1.Term.proto -> (Llvm.llvalue, Codegen_error.t) Result.t = fun context -> function
+let codegen_proto : codegen_state -> Ast.L1.Term.proto -> (Llvm.llvalue, Codegen_error.t) Result.t =
+  let open Result.Monad_infix in
+  fun context -> function
   | Source.Term.Prototype (name,args) ->
     let doubles = Array.create ~len:(Array.length args) (Llvm.double_type context.llcontext) in
     let ft = Llvm.function_type (Llvm.double_type context.llcontext) doubles in
-    match Llvm.lookup_function name context.llmodule with
-      | None -> Result.Ok (Llvm.declare_function name ft context.llmodule)
+    (match Llvm.lookup_function name context.llmodule with
       | Some f when Llvm.block_begin f <> Llvm.At_end f -> Result.Error (Codegen_error.Error "redefinition of function")
       | Some f when Llvm.element_type (Llvm.type_of f) <> ft -> Result.Error (Codegen_error.Error  "redefinition of function with different # args")
-      | Some f -> Array.iteri
-                    ~f:(fun i a ->
-                        let n = args.(i) in
-                        Llvm.set_value_name n a;
-                        match Hashtbl.add context.named_values n a with
-                        | `Ok | `Duplicate -> ()
-                       )
+      | None -> Result.Ok (Llvm.declare_function name ft context.llmodule)
+      | Some f -> Result.Ok f)
+    >>= fun f -> Array.iteri
+                   ~f:(fun i a ->
+                       let n = args.(i) in
+                       Llvm.set_value_name n a;
+                       match Hashtbl.add context.named_values n a with
+                       | `Ok
+                       | `Duplicate -> ()
+                      )
                     (Llvm.params f);
                   Result.Ok f
 
@@ -96,3 +97,11 @@ let codegen_function context =
     let _ = Llvm.build_ret ret_val context.llbuilder in
     Llvm_analysis.assert_valid_function the_function;
     Result.return the_function
+
+
+module Ptx = struct
+
+
+
+
+end

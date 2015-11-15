@@ -75,15 +75,14 @@ let () =
    match res with
    | None -> ()
    | Some s ->
-      let ps = Parser.make_parser_from_string s in
-      match Parser.term ps with
+      let ps = Pparser.make_parser_from_string s in
+      match Pparser.term ps with
       | Result.Ok tm ->
          printf "%s\n" (Ast.L0.Term.to_string tm);
          loop filename ()
-      | Result.Error (err, (fn, l, c)) ->
-         let error = match fn with
-         | Some n -> sprintf "%s:%i %i %s\n" n l c (Parse_error.to_string err)
-         | None -> sprintf "%s:%i %i %s\n" "<interactive>" l c (Parse_error.to_string err)
+      | Result.Error (err, l, l') ->
+         print_string (Parse_error.mark_string s l.Position.columnoffset l'.Position.columnoffset);
+         let error = sprintf "%s -- %s : %s\n" (Position.to_string l) (Position.to_string l') (Parse_error.to_string err)
          in
          print_string error;
          loop filename ()
@@ -112,10 +111,6 @@ let () =
       let r = Vgr.create ~warn (Vgr_cairo.stored_target fmt) (`Channel oc) in
       ignore (Vgr.render r (`Image (size, view, image)));
       ignore (Vgr.render r `End););
-      Command.run ~version:"1.0" ~build_info:"RWO" command;
-      colorprintf ~color:`Orchid "Running tests...\n";
-      print_string (Parse_error.mark_string "This is a test." 2 3);
-      print_string (Parse_error.mark_string "This is a test." 0 4);
+            colorprintf ~color:`Green "Running tests...\n";
       OUnit2.run_test_tt_main suite;
-
     end
