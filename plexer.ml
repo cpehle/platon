@@ -30,6 +30,8 @@ let rec token ({stream; pos_end;} as lexbuf) : (Token.t, Parse_error.t * Positio
     | "where" -> f (); Result.Ok WHERE
     | "int" -> f (); Result.Ok TINT
     | "bool" -> f (); Result.Ok TBOOL
+    | flo -> f (); Result.Ok (FLOAT (Float.of_string (lexeme lexbuf)))
+    | bin | hex | decimal -> f (); Result.Ok (INT (Int64.of_string (lexeme lexbuf)))
     | '(' -> f (); Result.Ok LPAREN
     | ')' -> f (); Result.Ok RPAREN
     | '[' -> f (); Result.Ok LBRACKET
@@ -44,8 +46,6 @@ let rec token ({stream; pos_end;} as lexbuf) : (Token.t, Parse_error.t * Positio
     | '+' -> f (); Result.Ok PLUS
     | '|' -> f (); Result.Ok PIPE
     | ':' -> f (); Result.Ok COLON
-    | bin | hex | decimal -> f (); Result.Ok (INT (Int64.of_string (lexeme lexbuf)))
-    | flo -> f (); Result.Ok (FLOAT (Float.of_string (lexeme lexbuf)))
     | ident -> f (); Result.Ok (IDENT (lexeme lexbuf))
     | eof -> f (); Result.Ok EOF
     | _ -> f (); fail lexbuf "Unexpected character"

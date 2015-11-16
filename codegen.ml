@@ -5,7 +5,7 @@ type codegen_state = {
   llcontext : Llvm.llcontext;
   llmodule  : Llvm.llmodule;
   llbuilder : Llvm.llbuilder;
-  named_values : (String.t, Llvm.llvalue) Hashtbl.t;
+  named_values : (string, Llvm.llvalue) Hashtbl.t;
 }
 
 let rec find_type_representation : codegen_state -> Source.Type.t -> Llvm.lltype
@@ -27,7 +27,6 @@ let rec codegen_term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_
   let open Result.Monad_infix in
   fun context ->
   function
-  | Source.Term.Trace (a,b) -> codegen_trace context a b
   | Source.Term.Literal l -> codegen_literal context l
   | Source.Term.Variable name -> begin
       match Hashtbl.find context.named_values name with
@@ -58,10 +57,7 @@ let rec codegen_term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_
     else
       Result.all (Array.to_list (Array.map args ~f:(codegen_term context))) >>| List.to_array >>= fun args ->
       Result.Ok (Llvm.build_call callee args "calltmp" context.llbuilder)
-and codegen_trace context var tm =
-  let ctm = codegen_term context tm in
-  (* Llvm.build_phi *)
-  ctm
+
 
 let codegen_proto : codegen_state -> Ast.L1.Term.proto -> (Llvm.llvalue, Codegen_error.t) Result.t =
   let open Result.Monad_infix in

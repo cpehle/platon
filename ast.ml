@@ -77,8 +77,10 @@ module L0 = struct
       | Let (v,e,e') -> "let " ^ v ^ " = " ^ (to_string e) ^ " in " ^ (to_string e')
     let var x = Variable x
     let app t t' = Application (t, t')
-    let lam v t = Lambda (v,t)
+    let fn v t = Lambda (v,t)
     let let_ v t t'  = Let (v,t,t')
+    let float f = Literal (Literal.Float f)
+    let int i = Literal (Literal.Int i)
   end
 
   (* module Relation = struct *)

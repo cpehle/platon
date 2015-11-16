@@ -10,6 +10,7 @@ let test_cases = [
     ("let fn in", Result.Ok [LET; FUN; IN]);
     (";", Result.Error ());
     ("~", Result.Error ());
+    ("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
     ("forall", Result.Ok [FORALL]);
     ("module", Result.Ok [MODULE]);
     ("12312313 12.32 \"string\"", Result.Ok [INT (Int64.of_int 12312313); FLOAT 12.32; STRING "string"])

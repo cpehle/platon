@@ -1,6 +1,5 @@
 open Core.Std
 open Core_extended.Color_print
-open Core_extended.Readline
 
 let codegen_top =
   let open Result.Monad_infix in
@@ -34,8 +33,7 @@ let codegen_top =
     Result.Ok ()
   end
 
-let id = Ast.L0.Term.Lambda ("x", Ast.L0.Term.Variable ("x"));;
-
+let id = Ast.L0.Term.fn "x" (Ast.L0.Term.var "x");;
 let suite = OUnit2.test_list [Test_lexer.suite; Test_inference.suite; Test_parser.suite]
 
 open Gg
@@ -69,34 +67,6 @@ let image =
   (List.fold_left colors ~init:(I.const Color.white) ~f:(fun acc c -> acc >> I.move (P2.v 0.2 0.0) >> I.blend (dot c da))) >> I.move (P2.v 1.0 1.0) >> I.blend triangle >> I.blend braid >> I.blend fork
 
 let () =
-  let open Result.Monad_infix in
-  let rec loop filename = fun () ->
-   let res = input_line ~prompt:">>> " () in
-   match res with
-   | None -> ()
-   | Some s ->
-      let ps = Pparser.make_parser_from_string s in
-      match Pparser.term ps with
-      | Result.Ok tm ->
-         printf "%s\n" (Ast.L0.Term.to_string tm);
-         loop filename ()
-      | Result.Error (err, l, l') ->
-         print_string (Parse_error.mark_string s l.Position.columnoffset l'.Position.columnoffset);
-         let error = sprintf "%s -- %s : %s\n" (Position.to_string l) (Position.to_string l') (Parse_error.to_string err)
-         in
-         print_string error;
-         loop filename ()
-  in
-  let spec =
-  let open Command.Spec in
-  empty
-  +> anon ("filename" %: string) in
-  let command =
-  Command.basic
-    ~summary:"Read eval print loop"
-    ~readme:(fun () -> "More detailed information")
-    spec
-    (fun filename () -> loop filename ()) in
   begin
     match codegen_top () with
     | Result.Error err -> print_string (Codegen_error.to_string err);
@@ -111,6 +81,18 @@ let () =
       let r = Vgr.create ~warn (Vgr_cairo.stored_target fmt) (`Channel oc) in
       ignore (Vgr.render r (`Image (size, view, image)));
       ignore (Vgr.render r `End););
-            colorprintf ~color:`Green "Running tests...\n";
+
+      let open Unionfind in
+      let set = make 1000 in
+      unite set 12 13;
+      unite set 14 15;
+      unite set 15 16;
+      unite set 12 15;
+      let () =
+        if find set 13 14
+        then print_string "Found\n"
+        else print_string "Failed\n"
+      in
+      colorprintf ~color:`Green "Running tests...\n";
       OUnit2.run_test_tt_main suite;
     end

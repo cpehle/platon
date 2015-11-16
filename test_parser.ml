@@ -4,11 +4,17 @@ open Pparser
 
 open Ast.L0.Term
 
-
 let test_cases = [
     ("let x = x in x", Result.Ok (let_ "x" (var "x") (var "x")));
+    ("let x = 12.12 in y", Result.Ok (let_ "x" (float 12.12) (var "y")));
+    ("x", Result.Ok (var "x"));
+    ("let f = fn x . x in f 12.0", Result.Ok (let_ "f" (fn "x" (var "x")) (app (var "f") (float 12.12))));
+    ("fn x . x", Result.Ok (fn "x" (var "x")));
+    ("123.12", Result.Ok (Literal (Literal.Float 123.12)));
+    ("123", Result.Ok (Literal (Literal.Int (Int64.of_int 123))));
+    ("x : int = 12", Result.Ok (var "x"));
+    ("x : vec _ int = 12 2 3 4 5 6", Result.Ok (var "x"))
   ]
-
 
 let parse_all str =
   let ps = make_parser_from_string str in
