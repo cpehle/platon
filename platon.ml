@@ -62,17 +62,25 @@ let image =
   let a = Float.pi_div_2 in
   let da = Float.two_pi /. 3. in
   let dotp = P.empty >> P.circle P2.o 0.08 in
+  let font = { Font.name = "Fira"; size = 0.7; weight = `W800; slant = `Normal} in
+  let glyphs = [ 53; 72; 89; 82; 79; 87; 4 ] in
+  let text = "Revolt!" in
   let dot c da = I.const c >> I.cut dotp >> I.move (V2.polar 0.05 (a +. da)) in
   let colors = [Color.v_srgb 0.608 0.067 0.118 ~a:0.75; Color.v_srgb 0.608 0.067 0.118 ~a:0.75; Color.v_srgb 0.608 0.067 0.118 ~a:0.75] in
   (List.fold_left colors ~init:(I.const Color.white) ~f:(fun acc c -> acc >> I.move (P2.v 0.2 0.0) >> I.blend (dot c da))) >> I.move (P2.v 1.0 1.0) >> I.blend triangle >> I.blend braid >> I.blend fork
+  >> I.blend
+       (
+         I.const Color.black >> I.cut_glyphs ~text font glyphs >>
+           I.move (V2.v 0.23 0.25)
+       )
 
 let () =
   begin
     match codegen_top () with
     | Result.Error err -> print_string (Codegen_error.to_string err);
     | Result.Ok res ->
-   (* This is a test of graphics output, eventual goal. Develop
-      interactively in interpreter get a live view of the
+   (* This is a test of graphics output. The eventual goal is to develop
+      interactively in the interpreter and get a live view of the
       computational graph in an output window *)
       Out_channel.with_file "test.png" ~f:(fun oc ->
       let res = 300. /. 0.0254 (* 300dpi in dots per meters *) in
@@ -92,6 +100,18 @@ let () =
         if find set 13 14
         then print_string "Found\n"
         else print_string "Failed\n"
+      in
+      let open Tsdl in
+
+      let () = match Sdl.init Sdl.Init.video with
+        | `Error e -> Sdl.log "Init error: %s" e; exit 1
+        | `Ok () ->
+           match Sdl.create_window ~w:640 ~h:480 "SDL OpenGL" Sdl.Window.opengl with
+           | `Error e -> Sdl.log "Create window error: %s" e; exit 1
+           | `Ok w ->
+              Sdl.delay 3000l;
+              Sdl.destroy_window w;
+              Sdl.quit ();
       in
       colorprintf ~color:`Green "Running tests...\n";
       OUnit2.run_test_tt_main suite;

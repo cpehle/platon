@@ -12,9 +12,9 @@ to magma it works over an arbitrary base monoidal category.
 
 * Theory
 
-Given a monoidal catgory $(M, \otimes, I)$ one can formulate a number
-of algebraic structures internal to the category $M$. A lot of them
-arise as functors from certain small categories into $M$.
+Given a monoidal catgory (M, \otimes, I) one can formulate a number
+of algebraic structures internal to the category M. A lot of them
+arise as functors from certain small categories into M.
 
 Natural transformations have the interpretation of communication
 patterns and optimizations.
@@ -23,47 +23,19 @@ Zero cost abstractions (See for example HardCaml for how this is done
 by metaprogramming, aswell as Common Lisp / C++ / Rust).
 
 
-** Renormalization and convolutional neural networks
-
-
-** Renormalization and mean field theory:
-
-Distinguish between generating functions and propagators and
-interactions.
-
-** Develop Penrose's tensor calculus is full generality
-*** Investigate automatic differentiation as examples
-
-
-*** Study lisp / urbit as weird examples
-
-*** Study stack based languages as weird examples
-
-*** Study dataflow processor architectures
-
-*** Examples for "data flow" languages / monoidal categories
-- ChucK
-- Faust digital signal processing language
-- Quantum logic / Quantum information theory
-- Esterel
-- QFT
-- HDL
-- Sisal
-- TensorFlow
-- Biology modelling languages
-- React
-- Differential games
-
-** How does one encode the concept of Manifold / Space to do computation on?
-** Investigate scheduling / placement algorithms on heterogenous hardware
-
-** Inference over manifolds
-
-*** Agents fibered over manifold connected by "signal net"
-
 
 
 * Implementation
+
+
+
+
+
+
+** Symbolic programming
+
+- PDE
+- Useful for things like Deep Learning
 
 ** Optimization
 
@@ -105,14 +77,17 @@ Algebraic effects?
   
 *** Computational model
 
+**** Agents fibered over manifold connected by "signal net"
+
+**** Geometry of Computation
+
 "Slogan": Ordinary computation == Computation over a point
 
 Instead consider a sheaf of monoidal categories over a space
 Investigate the following computational model:
 
 - Primitives are nodes (cells) and connections between them, they 
-  communicate in via asynchronous message passing compare to systems
-  like Pregel, that have an explicit synchronization mechanism.
+  communicate in via asynchronous message passing.
 - Each node has no knowledge of which nodes connect to it, that is it
   can receive messages from anyone that knows its "address".  Every node
   has knowledge to which nodes it is connected to and those can change
@@ -120,6 +95,14 @@ Investigate the following computational model:
 - Generalize to N dimensions, that is "Edges", "Faces" etc. can have
   state that is computed from lower and higher order information, faces
   and so on can split and merge, etc.
+- Computational primitives are: Have maps \delta^i_k (k = 0..i) that
+  map the (i+1) dimensional simplex to one of its faces \colon
+  \Delta^{i+1} \to \Delta^{i}. Similarly have i+1 maps that map the
+  i-simplex to the faces of the i+1 simplex. Given an n-simplex
+  consider a map that assigns to every vertex a group G_i, to every
+  edge an group homomorphism $g_{ij} \colon G_i \to G_j$.
+
+
 
 Take inspiration from Biology:
 

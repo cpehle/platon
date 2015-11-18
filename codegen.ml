@@ -10,11 +10,12 @@ type codegen_state = {
 
 let rec find_type_representation : codegen_state -> Source.Type.t -> Llvm.lltype
   = fun ctx -> function
-            | Source.Type.Base bt -> begin match bt with
-                                           | Source.Type.Double ->
-                                              (Llvm.double_type ctx.llcontext)
-                                           | Source.Type.Integer -> (Llvm.integer_type ctx.llcontext 32) end
-            | Source.Type.Arrow (t,t_) -> (Llvm.integer_type ctx.llcontext 32)
+            | Source.Type.Base bt ->
+               begin match bt with
+                     | Source.Type.Double ->
+                        (Llvm.double_type ctx.llcontext)
+                     | Source.Type.Integer -> (Llvm.integer_type ctx.llcontext 32) end
+            | Source.Type.Arrow (t,t') -> (Llvm.integer_type ctx.llcontext 32)
 
 let codegen_struct context array =
   Llvm.struct_type context array
@@ -93,11 +94,3 @@ let codegen_function context =
     let _ = Llvm.build_ret ret_val context.llbuilder in
     Llvm_analysis.assert_valid_function the_function;
     Result.return the_function
-
-
-module Ptx = struct
-
-
-
-
-end

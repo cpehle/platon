@@ -1,5 +1,6 @@
 open Core.Std
 
+
 type filename = string
 type error_msg = string
 
@@ -19,7 +20,7 @@ let make_parser_from_string  (s:string) : env =
       env_peek   = first_token;
       env_depth  = 0;
       env_lexbuf = lexbuf;
-      env_file   = "interactive";
+      env_file   = "<none>";
     } in ps
 
 let make_parser_from_file (f:string) : env =
@@ -42,15 +43,15 @@ let expect (ps:env) (t:Token.t) : (unit, Parse_error.t * Position.t * Position.t
   let open Result.Monad_infix in
   peek ps >>= fun token ->
   if phys_equal token t
-  then let () = bump ps in Result.return ()
+  then begin bump ps; Result.return () end
   else fail ps (Parse_error.UnexpectedTokenExpected (token, t))
 
-let ident (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t * Position.t) Result.t =
+let ident (ps:env) : (string * Position.t * Position.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   peek ps >>= fun token ->
   match token with
-      | Token.IDENT id -> let _ = bump ps in
-                          Result.return (Ast.L0.Term.Variable id)
+      | Token.IDENT id -> bump ps;
+                          Result.return (id, ps.env_lexbuf.Lexbuf.pos_start, ps.env_lexbuf.Lexbuf.pos_end)
       | _ as token -> fail ps (Parse_error.UnexpectedTokenWithExpectation (Token.to_string token, "identifier"))
 
 let rec ptype (ps:env) : (Ast.L0.Type.t, Parse_error.t * Position.t * Position.t) Result.t =
@@ -70,55 +71,63 @@ and ptype0 t1 ps =
                               ptype ps >>= fun t2 -> return  (Ast.L0.Type.TArrow (t1, t2, Ast.L0.Type.default_levels))
                            | _ -> return t1
 
+(**
+term : Parses a top level term
+
+<id> [: <typeannot>] = <termlist>
+<termlist> [: <typeannot>] <op> <termlist>
+
+**)
+
 let rec term (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   peek ps >>= fun token -> match token with
   |  Token.IDENT id ->
-      bump ps;
+      ident ps >>= fun (id,p,p') ->
       Result.return  (Ast.L0.Term.Variable id)
+  | Token.FLOAT f -> bump ps; Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Float f))
+  | Token.INT i ->  bump ps; Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Int i))
   | Token.LPAREN ->
      term ps >>= fun tm ->
      expect ps Token.RPAREN >>=  fun _ ->
      Result.return tm
-  | Token.RBRACE ->
+  | Token.LBRACE ->
      term ps >>= fun tm ->
      expect ps Token.RBRACE >>= fun _ ->
      Result.return tm
-  | Token.RBRACKET ->
+  | Token.LBRACKET ->
      term ps >>= fun tm ->
      expect ps Token.RBRACKET >>= fun _ ->
      Result.return tm
   | Token.LET -> plet ps
   | Token.FUN -> pfun ps
-  | Token.FLOAT f -> Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Float f))
-  | Token.INT i ->  Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Int i))
+
   | _ as t -> fail ps (Parse_error.UnexpectedToken (Token.to_string t))
 and application (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
-  ident ps >>= fun fn ->
-  ident ps >>= fun var -> Result.return (Ast.L0.Term.Application (fn, var))
+  ident ps >>| (fun (id,p,p') -> id) >>| Ast.L0.Term.var >>= fun fn ->
+  ident ps >>| (fun (id,p,p') -> id) >>| Ast.L0.Term.var >>= fun var -> Result.return (Ast.L0.Term.Application (fn, var))
 and plet (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
+  let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
   expect ps (Token.LET) >>= fun _ ->
-  ident ps >>= function
-  | (Ast.L0.Term.Variable v) ->
+  ident ps >>| (fun (id,p,p') -> id) >>= fun v ->
      expect ps (Token.EQUALS) >>= fun _ ->
-     term ps >>= fun tm ->
+     term_list ps (Token.IN) [] >>| Ast.L0.Term.prod >>= fun tm ->
      expect ps (Token.IN) >>= fun _ ->
      term ps >>= fun body ->
+     let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
      Result.return (Ast.L0.Term.Let (v, tm, body))
-  | _ -> fail ps Parse_error.InternalError
 and pfun (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
+  let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
   expect ps (Token.FUN) >>= fun _ ->
-  ident ps >>= function
-  | Ast.L0.Term.Variable v ->
+  ident ps >>|  (fun (id,p,p') -> id) >>= fun v ->
      expect ps (Token.DOT) >>= fun _ ->
      term ps >>= fun tm ->
+     let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
      Result.return (Ast.L0.Term.Lambda (v, tm))
-  | _  -> fail ps Parse_error.InternalError
-
-let rec term_list (ps:env) end_token tl =
+and term_list (ps:env) end_token tl =
   let open Result.Monad_infix in
   peek ps >>= fun token ->
   if token = end_token
@@ -127,10 +136,3 @@ let rec term_list (ps:env) end_token tl =
     term ps >>= fun tm ->
     let tl = List.append  tl  [tm] in
     term_list ps end_token tl
-
-let rec pmodule (ps:env) =
-  let open Result.Monad_infix in
-  expect ps Token.MODULE >>= fun _ ->
-  ident ps >>= fun mod_ident ->
-  term_list ps Token.EOF []  >>= fun tl ->
-  Result.return (Ast.L0.Module.Module (mod_ident, tl))

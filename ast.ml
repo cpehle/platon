@@ -7,7 +7,8 @@ module type IDENT = sig
   val equal: t -> t -> bool
   type 'a tbl
   val emptytbl: 'a tbl
-  val add: t -> 'a -> 'a tbl -> 'a tbl val find: t -> 'a tbl -> 'a
+  val add: t -> 'a -> 'a tbl -> 'a tbl
+  val find: t -> 'a tbl -> 'a
 end
 
 module Ident : IDENT = struct
@@ -34,19 +35,29 @@ module type SUBST = sig
   val add: Ident.t -> path -> t -> t val path: path -> t -> path
 end *)
 
-module Id = struct
-  let gen_id = ref 0;
-  type t = {
-      varname : string;
-      id : int;
-    }
-  let fresh = fun () ->
-    let id = gen_id.contents in
-    gen_id := gen_id.contents + 1;
-    { varname = "x"; id = id}
+module type ID = sig
+  type t
+  val create : string -> t
+  val name : t -> string
 end
 
+module Id : ID = struct
+  type t = { id : int; name : string}
 
+  let current_id = ref 0
+
+  let name i = i.name
+
+  let create s =
+    incr current_id;
+    { name = s; id = !current_id}
+
+  let rename i =
+    incr current_id;
+    { i with id = !current_id}
+
+  let same i1 i2 = i1 = i2
+end
 
 module L0 = struct
   module Term = struct
@@ -65,20 +76,22 @@ module L0 = struct
     type t =
       | Variable of varname
       | Literal of Literal.t
+      | Prod of t list
       | Application of t * t
       | Lambda of varname * t
       | Let of varname * t * t
-
     let rec to_string = function
-      | Variable v -> v
+      | Variable (varname) -> varname
       | Literal l -> (Literal.to_string l)
+      | Prod tl -> String.concat ~sep:" " (List.map tl ~f:to_string)
       | Application (e,e') -> (to_string e) ^ " " ^ (to_string e')
-      | Lambda (v,e) -> "fn " ^ v ^ " . " ^ (to_string e)
+      | Lambda (v,e) -> "fn " ^  v ^ " . " ^ (to_string e)
       | Let (v,e,e') -> "let " ^ v ^ " = " ^ (to_string e) ^ " in " ^ (to_string e')
     let var x = Variable x
     let app t t' = Application (t, t')
+    let prod tl  = Prod tl
     let fn v t = Lambda (v,t)
-    let let_ v t t'  = Let (v,t,t')
+    let let_ v t t' = Let (v,t,t')
     let float f = Literal (Literal.Float f)
     let int i = Literal (Literal.Int i)
   end
@@ -105,6 +118,7 @@ module L0 = struct
   (*     | Const _ as e -> e *)
   (*     | App (c, ls) -> App (c, List.map ~f:(subst_relation env)) *)
   (* end *)
+
   module Type = struct
     type qname = string
     type level = int

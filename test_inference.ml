@@ -37,7 +37,8 @@ let test1 text_ctxt = assert_equal
            {level_old = 1; level_new = 1}),
         {level_old = 1; level_new = 1}))
     (  top_type_check (fn "x" (fn "y" (let_ "x" (app (var "x") (var "y"))
-                                                    (fn "x" (app (var "y") (var "x")))))))
+                                            (fn "x" (app (var "y") (var "x")))))))
+
 
 let test2 text_ctxt = assert_equal
     (TArrow (TVar {contents = Unbound ("a", 1)},

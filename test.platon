@@ -4,5 +4,37 @@ let x = y in z
 let z = x in p -- in the same line as source code.
 let g = d in q
 
-     
 
+
+fn x → 1 2 3 4
+
+f ⇒
+
+f ⊦
+
+
+
+
+—— This is a comment                                                                                                
+
+
+↑ ↓ ⟨ ⟩ ∈ ∩ ∪ ∨ ∧
+←
+
+“This is a string” — It uses the non-typewriter convention different opening and closing quotes.
+
+          ⎧ ∑
+let f x = ⎨ Why not
+          ⎩ It is not that hard.
+
+
+let x = function
+  | square x →
+  | test y →
+  | record z →
+  | var y →
+
+
+
+main = do
+     putStrLn "Hello World."

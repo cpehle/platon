@@ -23,6 +23,7 @@ type t = LET
        | FLOAT of float
        | IDENT of string
        | STRING of string
+       | SPACES
        | ARROW
        | EQUALS
        | FUN
@@ -62,4 +63,5 @@ let to_string t = match t with
                     | MINUS -> "-"
                     | PLUS -> "+"
                     | PIPE -> "|"
+                    | SPACES -> "<spaces>"
                     | COLON -> ","

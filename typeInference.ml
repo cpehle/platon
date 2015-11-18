@@ -3,12 +3,10 @@ open Ast.L0
 type varname = string
 type env = (varname * Type.t) list
 
-
 type type_inference_state = {
   mutable gensym_counter : int;
   mutable current_level  : int;
-  mutable to_be_level_adjusted : Type.t list;
-  }
+  mutable to_be_level_adjusted : Type.t list; }
 
 let reset_gensym (s : type_inference_state) = s.gensym_counter <- 0
 let reset_level (s : type_inference_state) = s.current_level <- 1
@@ -27,10 +25,6 @@ let gensym s =
 let new_var s = Type.TVar (ref (Type.Unbound (gensym s, s.current_level)))
 let new_arrow s t1 t2 = Type.TArrow (t1, t2, {Type.level_new = s.current_level; Type.level_old = s.current_level})
 
-(* Chase the links of bound variables, returning either a free
-   variable or a constructed type. OCaml's typing/btype.ml has the
-   same function with the same name. Unlike OCaml, we do path
-   compression. *)
 let rec repr : Type.t -> Type.t = function
   | Type.TVar ({contents = Type.Link t} as tvr) ->
     let t = repr t in
@@ -53,7 +47,6 @@ let rec cycle_free : Type.t -> unit = function
     cycle_free t2;
     ls.Type.level_new <- level
   | _ -> assert false
-
 
 let update_level : type_inference_state -> Type.level -> Type.t -> unit =
   fun s l -> function
@@ -83,7 +76,7 @@ let rec unify : type_inference_state -> Type.t -> Type.t -> unit =
       | (Type.TVar ({contents = Type.Unbound (_,l)} as tv),t')
       | (t', Type.TVar ({contents = Type.Unbound (_,l)} as tv)) ->
 	       update_level s l t';
-         tv := Type.Link t'
+           tv := Type.Link t'
       | (Type.TArrow (tyl1, tyl2,ll), Type.TArrow (tyr1, tyr2, lr)) ->
          if ll.Type.level_new = Type.marked_level || lr.Type.level_new = Type.marked_level then
            failwith "cycle: occurs check.";

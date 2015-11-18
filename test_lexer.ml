@@ -22,7 +22,9 @@ let string_of_result = function
   | Result.Ok tokens -> "OK (" ^ String.concat ~sep:", " (List.map ~f:Token.to_string  tokens) ^ ")"
 
 let make_single_test_case (code, expected_result) =
+
   String.escaped code >:: fun _ ->
+                          let lexbuf = Lexbuf.from_string code in
                           assert_equal ~printer:string_of_int 1 1
 
 let suite =
