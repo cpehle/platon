@@ -12,6 +12,16 @@ type env = {
     env_file : filename;
   }
 
+let from_lexbuf lexbuf : env =
+  let  first_token = Plexer.token lexbuf in
+  let ps = {
+      on_error   = None;
+      env_peek   = first_token;
+      env_depth  = 0;
+      env_lexbuf = lexbuf;
+      env_file   = "<none>";
+    } in ps
+
 let make_parser_from_string  (s:string) : env =
   let lexbuf = Lexbuf.from_string s in
   let first_token = Plexer.token lexbuf in
@@ -67,7 +77,7 @@ and ptype0 t1 ps =
   let open Result in
   let open Result.Monad_infix in
   peek ps >>= fun token -> match token with
-                           | Token.ARROW ->
+                           | Token.RIGHTARROW ->
                               ptype ps >>= fun t2 -> return  (Ast.L0.Type.TArrow (t1, t2, Ast.L0.Type.default_levels))
                            | _ -> return t1
 
@@ -88,14 +98,17 @@ let rec term (ps:env) : (Ast.L0.Term.t, Parse_error.t * Position.t * Position.t)
   | Token.FLOAT f -> bump ps; Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Float f))
   | Token.INT i ->  bump ps; Result.return (Ast.L0.Term.Literal (Ast.L0.Term.Literal.Int i))
   | Token.LPAREN ->
+     bump ps;
      term ps >>= fun tm ->
      expect ps Token.RPAREN >>=  fun _ ->
      Result.return tm
   | Token.LBRACE ->
+     bump ps;
      term ps >>= fun tm ->
      expect ps Token.RBRACE >>= fun _ ->
      Result.return tm
   | Token.LBRACKET ->
+     bump ps;
      term ps >>= fun tm ->
      expect ps Token.RBRACKET >>= fun _ ->
      Result.return tm

@@ -39,7 +39,7 @@ let rec token ({stream; pos_end;} as lexbuf) : (Token.t, Parse_error.t * Positio
     | '{' -> f (); Result.Ok LBRACE
     | '}' -> f (); Result.Ok RBRACE
     | '=' -> f (); Result.Ok EQUALS
-    | "->"-> f (); Result.Ok ARROW
+    | "->" | 8594 | 10230 -> f (); Result.Ok RIGHTARROW
     | ',' -> f (); Result.Ok COMMA
     | '.' -> f (); Result.Ok DOT
     | '-' -> f (); Result.Ok MINUS

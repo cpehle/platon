@@ -6,7 +6,8 @@ type codegen_state = {
   llmodule  : Llvm.llmodule;
   llbuilder : Llvm.llbuilder;
   named_values : (string, Llvm.llvalue) Hashtbl.t;
-}
+  }
+
 
 let rec find_type_representation : codegen_state -> Source.Type.t -> Llvm.lltype
   = fun ctx -> function
@@ -23,6 +24,9 @@ let codegen_struct context array =
 let codegen_literal = fun context -> function
   | Source.Term.Double d -> Result.Ok (Llvm.const_float (Llvm.double_type context.llcontext) d)
   | Source.Term.Integer i -> Result.Ok (Llvm.const_int (Llvm.integer_type context.llcontext 32) i)
+
+let codegen_select context res = ()
+let codegen_binop context op = ()
 
 let rec codegen_term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
   let open Result.Monad_infix in

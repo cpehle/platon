@@ -24,7 +24,7 @@ type t = LET
        | IDENT of string
        | STRING of string
        | SPACES
-       | ARROW
+       | RIGHTARROW
        | EQUALS
        | FUN
        | EOF
@@ -56,10 +56,10 @@ let to_string t = match t with
                     | INT i -> Int64.to_string i
                     | COMMA -> ","
                     | IDENT s -> "identifier"
-                    | ARROW -> "->"
+                    | RIGHTARROW -> "→"
                     | EQUALS -> "="
                     | FUN -> "fun"
-                    | EOF -> "end of file"
+                    | EOF -> "(end of file)"
                     | MINUS -> "-"
                     | PLUS -> "+"
                     | PIPE -> "|"
