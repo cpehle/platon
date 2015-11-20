@@ -5,7 +5,7 @@ install: true
 addons:
   apt:
     packages:
-        libllvm3.7
+        llvm-3.7
 
 before_script:
   - mkdir bin
