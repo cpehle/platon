@@ -24,7 +24,7 @@ let codegen_top =
   >>= fun l ->
   begin
     ignore (Llvm_executionengine.initialize ());
-    Llvm_NVPTX.initialize ();
+    (* Llvm_NVPTX.initialize (); *)
     let e = Llvm_executionengine.create the_module in
     let fpm = Llvm.PassManager.create_function the_module in
     Llvm_target.DataLayout.add_to_pass_manager fpm (Llvm_executionengine.data_layout e);

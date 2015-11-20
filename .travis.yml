@@ -1,6 +1,12 @@
 language: c
 sudo: false
 install: true
+
+addons:
+  apt:
+    packages:
+        libllvm3.7
+
 before_script:
   - mkdir bin
   - wget https://github.com/ocaml/opam/releases/download/1.2.2/opam-1.2.2-x86_64-Linux -O $PWD/bin/opam

@@ -23,7 +23,7 @@ f ⊦
 
 “This is a string” — It uses the non-typewriter convention different opening and closing quotes.
 
-          ⎧ ∑
+          ⎧ ₛ
 let f x = ⎨ Why not
           ⎩ It is not that hard.
 
