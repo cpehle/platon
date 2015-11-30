@@ -24,7 +24,6 @@ let codegen_top =
   >>= fun l ->
   begin
     ignore (Llvm_executionengine.initialize ());
-    (* Llvm_NVPTX.initialize (); *)
     let e = Llvm_executionengine.create the_module in
     let fpm = Llvm.PassManager.create_function the_module in
     Llvm_target.DataLayout.add_to_pass_manager fpm (Llvm_executionengine.data_layout e);
@@ -103,6 +102,7 @@ let () =
         then print_string "Found\n"
         else print_string "Failed\n"
       in
+      (*
       let open Tsdl in
       let () = match Sdl.init Sdl.Init.video with
         | `Error e -> Sdl.log "Init error: %s" e; exit 1
@@ -114,6 +114,7 @@ let () =
               Sdl.destroy_window w;
               Sdl.quit ();
       in
+       *)
       colorprintf ~color:`Green "Running tests...\n";
       OUnit2.run_test_tt_main suite;
     end

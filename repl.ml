@@ -1,14 +1,17 @@
 open Core.Std
+open Core_extended.Color_print
 open Core_extended.Readline
+
 
 let () =
   let open Result.Monad_infix in
   let rec loop filename = fun () ->
-    let res = input_line ~prompt:"   " () in
+    let prompt = color_sprintf ~color:`Red "> " in
+    let res = input_line ~prompt () in
    match res with
    | None -> ()
    | Some s ->
-      let ps = Pparser.make_parser_from_string s in
+      let ps = Pparser.from_string s in
       match Pparser.term ps with
       | Result.Ok tm ->
          printf "%s\n" (Ast.L0.Term.to_string tm);

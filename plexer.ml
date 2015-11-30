@@ -32,6 +32,7 @@ let rec token ({stream; pos_end;} as lexbuf) : (Token.t, Parse_error.t * Positio
     | "bool" -> f (); Result.Ok TBOOL
     | flo -> f (); Result.Ok (FLOAT (Float.of_string (lexeme lexbuf)))
     | bin | hex | decimal -> f (); Result.Ok (INT (Int64.of_string (lexeme lexbuf)))
+    | '"', Plus (Compl '"'), '"' -> f (); let s = lexeme lexbuf in Result.Ok (STRING (String.sub s 1 (String.length s - 2)))
     | '(' -> f (); Result.Ok LPAREN
     | ')' -> f (); Result.Ok RPAREN
     | '[' -> f (); Result.Ok LBRACKET

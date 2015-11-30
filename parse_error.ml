@@ -30,11 +30,12 @@ let to_string = function
 let mark_string s from until =
   let strlen = String.length s in
   let mark = String.make strlen ' ' in
-  if (0 <= from) && (from < until) && (until < strlen)
-  then for i = from to until do
-    String.set mark i '~';
-  done;
+  if (0 <= from) && (from < until) && (until < strlen) then begin
+    for i = from to until do
+      String.set mark i '~';
+    done;
   String.set mark from '^';
   String.set mark until '^';
+  end else ();
   let mark =  color ~color:`Red mark in
   (String.concat ~sep:"\n" [s;mark]) ^ "\n"

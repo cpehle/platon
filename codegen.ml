@@ -32,6 +32,7 @@ let rec codegen_term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_
   let open Result.Monad_infix in
   fun context ->
   function
+  | Source.Term.Trace _ -> Result.Error (Codegen_error.Error ("Not implemented: Trace"))
   | Source.Term.Literal l -> codegen_literal context l
   | Source.Term.Variable name -> begin
       match Hashtbl.find context.named_values name with

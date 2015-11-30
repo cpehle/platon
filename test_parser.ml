@@ -17,7 +17,7 @@ let test_cases = [
   ]
 
 let parse_all str =
-  let ps = make_parser_from_string str in
+  let ps = from_string str in
   term ps
 
 let string_of_result = function

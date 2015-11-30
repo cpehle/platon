@@ -1,7 +1,6 @@
 open Core.Std
 open Ast.L0
 
-
 type filename = string
 type error_msg = string
 
@@ -12,6 +11,13 @@ type env = {
     env_lexbuf : Lexbuf.t;
     env_file : filename;
   }
+
+(**
+
+Utilities
+---------
+
+ *)
 
 let from_lexbuf lexbuf : env =
   let  first_token = Plexer.token lexbuf in
@@ -24,29 +30,13 @@ let from_lexbuf lexbuf : env =
     } in ps
 
 let from_string  (s:string) : env =
-  let lexbuf = Lexbuf.from_string s in
-  let first_token = Plexer.token lexbuf in
-  let ps = {
-      on_error   = None;
-      env_peek   = first_token;
-      env_depth  = 0;
-      env_lexbuf = lexbuf;
-      env_file   = "<none>";
-    } in ps
+  Lexbuf.from_string s |> from_lexbuf
 
 let from_file (f:string) : env =
   In_channel.with_file f ~f:(fun channel ->
-  let lexbuf = Lexbuf.from_channel channel in
-  let first_token = Plexer.token lexbuf in
-  let ps = {
-      on_error   = None;
-      env_peek   = first_token;
-      env_depth  = 0;
-      env_lexbuf = lexbuf;
-      env_file   = f;
-    } in ps)
+  Lexbuf.from_channel channel |> from_lexbuf)
 
-let fail ps perror = Result.Error (perror, ps.env_lexbuf.Lexbuf.pos_start, ps.env_lexbuf.Lexbuf.pos_end)
+let fail (ps:env) perror = Result.Error (perror, ps.env_lexbuf.Lexbuf.pos_start, ps.env_lexbuf.Lexbuf.pos_end)
 let peek (ps:env) : (Token.t, Parse_error.t * Position.t * Position.t) Result.t = ps.env_peek
 let bump (ps:env) : unit = ps.env_peek <- Plexer.token ps.env_lexbuf
 
@@ -82,20 +72,12 @@ and ptype0 t1 ps =
                               ptype ps >>= fun t2 -> return  (Type.TArrow (t1, t2, Type.default_levels))
                            | _ -> return t1
 
-(**
-term : Parses a top level term
-
-<id> [: <typeannot>] = <termlist>
-<termlist> [: <typeannot>] <op> <termlist>
-
-**)
-
 let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
-  peek ps >>= fun token -> match token with
-  |  Token.IDENT id ->
-      ident ps >>= fun (id,p,p') ->
-      Result.return  (Term.Variable id)
+  peek ps >>= function
+  | Token.IDENT id ->
+     ident ps >>= fun (id,p,p') ->
+     Result.return  (Term.Variable id)
   | Token.FLOAT f -> bump ps; Result.return (Term.Literal (Term.Literal.Float f))
   | Token.INT i ->  bump ps; Result.return (Term.Literal (Term.Literal.Int i))
   | Token.LPAREN ->
@@ -115,7 +97,6 @@ let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result
      Result.return tm
   | Token.LET -> plet ps
   | Token.FUN -> pfun ps
-
   | _ as t -> fail ps (Parse_error.UnexpectedToken (Token.to_string t))
 and application (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
@@ -126,12 +107,12 @@ and plet (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
   expect ps (Token.LET) >>= fun _ ->
   ident ps >>| (fun (id,p,p') -> id) >>= fun v ->
-     expect ps (Token.EQUALS) >>= fun _ ->
-     term_list ps (Token.IN) [] >>| Term.prod >>= fun tm ->
-     expect ps (Token.IN) >>= fun _ ->
-     term ps >>= fun body ->
-     let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
-     Result.return (Term.Let (v, tm, body))
+  expect ps (Token.EQUALS) >>= fun _ ->
+  term_list ps (Token.IN) [] >>| Term.prod >>= fun tm ->
+  expect ps (Token.IN) >>= fun _ ->
+  term ps >>= fun body ->
+  let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
+  Result.return (Term.Let (v, tm, body))
 and pfun (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
@@ -143,10 +124,9 @@ and pfun (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
      Result.return (Term.Lambda (v, tm))
 and term_list (ps:env) end_token tl =
   let open Result.Monad_infix in
-  peek ps >>= fun token ->
-  if token = end_token
-  then Result.return tl
-  else
-    term ps >>= fun tm ->
+  peek ps >>= function
+  | Token.EOF -> fail ps (Parse_error.UnexpectedToken "<eof>")
+  | t when t = end_token ->  Result.return tl
+  | _ -> term ps >>= fun tm ->
     let tl = List.append  tl  [tm] in
     term_list ps end_token tl
