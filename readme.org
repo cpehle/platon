@@ -22,23 +22,13 @@ patterns and optimizations.
 Zero cost abstractions (See for example HardCaml for how this is done
 by metaprogramming, aswell as Common Lisp / C++ / Rust).
 
-
-
-
 * Implementation
-
-
-
-
-
-
 ** Symbolic programming
 
 - PDE
 - Useful for things like Deep Learning
 
 ** Optimization
-
 - read paper on Stratego
 - optimization via saturation (machine learning applied to optimization)
 - need well defined notion of program equivalence and then introduce stochastic walk in space of possible equivalent programs
@@ -51,7 +41,6 @@ by metaprogramming, aswell as Common Lisp / C++ / Rust).
 - dynamic data / code locallity improvement (i.e. learn access patterns and optimize for them)
 
 ** Features
-
 Monoidal categories (Particle analogy), linear logic, syntactic
 control of interference. (Patterns of information)
 
@@ -66,9 +55,7 @@ Algebraic effects?
 
 
 *** Concurrency 
-
 - One shot continuations (require linear type system)
-
 
 *** Type system
 
