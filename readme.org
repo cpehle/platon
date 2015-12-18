@@ -2,15 +2,46 @@
 
 Platon aims to be a general purpose programming language that is
 extensible and supports unconventional programming models. 
-The current implementation is not a monolithic compiler, but is
+The implementation will not be a monolithic compiler, but is
 structured around a meta language for program transformation and
 symbolic computation.
 
 One of the main distiguishing features is that platon is designed to
-support typed symbolic programming, similiarly to Magma. In contrast
-to magma it works over an arbitrary base monoidal category.
+support typed symbolic programming over an arbitrary base monoidal
+category.
+
+The intention is for this language to be based on ideas from
+mathematics and features determined from case studies. By including
+only features that have a sound mathematical theory behind them, we
+hope to design a language that does not contain unnescessary
+complexity, by considering use cases we hope to ground our design in
+reality. We believe that given the choice a language should always try
+subsume as many features as possible by a general mechanism. An
+example is error handling: Clearly any large scale program needs some
+form of error handling, 
+
 
 * Theory
+
+There is a correspondence between simply typed lambda calculus and the
+internal logical of cartesian closed categories. In simply typed
+lambda calculus.
+
+In simply typed lambda calculus, given a set of base types $base$ the
+types of the theory are
+
+$type t = t \to t | base | t \times t$ 
+
+Here $\to$ denotes a left associative binary operation and $\times$
+the cartesian product.
+
+The terms of the calculus are:
+
+$type t = variable | \lambda variable * Type.t * t | App t * t | \cross t * t | \pi_k | constant$
+
+
+
+
 
 Given a monoidal catgory (M, \otimes, I) one can formulate a number
 of algebraic structures internal to the category M. A lot of them
@@ -22,7 +53,13 @@ patterns and optimizations.
 Zero cost abstractions (See for example HardCaml for how this is done
 by metaprogramming, aswell as Common Lisp / C++ / Rust).
 
+
 * Implementation
+
+** Propagators
+
+** Linear types
+
 ** Symbolic programming
 
 - PDE
@@ -74,7 +111,7 @@ Instead consider a sheaf of monoidal categories over a space
 Investigate the following computational model:
 
 - Primitives are nodes (cells) and connections between them, they 
-  communicate in via asynchronous message passing.
+  communicate via asynchronous message passing.
 - Each node has no knowledge of which nodes connect to it, that is it
   can receive messages from anyone that knows its "address".  Every node
   has knowledge to which nodes it is connected to and those can change

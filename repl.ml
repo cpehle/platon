@@ -30,7 +30,7 @@ let () =
   let command =
   Command.basic
     ~summary:"Read eval print loop"
-    ~readme:(fun () -> "More detailed information")
+    ~readme:(fun () -> "This is the read eval print loop of platon")
     spec
     (fun filename () -> loop filename ()) in
   Command.run command

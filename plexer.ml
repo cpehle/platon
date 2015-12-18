@@ -7,6 +7,7 @@ let fail {pos_start; pos_end} s : (Token.t, Parse_error.t * Position.t * Positio
 
 let rec token ({stream; pos_end;} as lexbuf) : (Token.t, Parse_error.t * Position.t * Position.t) Result.t =
   let f () = update_position lexbuf in
+  (* let space = [%sedlex.regexp? ' '] in *)
   let hexdig = [%sedlex.regexp? '0'..'9' |  'a'..'f' | 'A'..'F'] in
   let bin = [%sedlex.regexp? "0b", Plus ('0' | '1' | '_')] in
   let hex = [%sedlex.regexp? "0x", Plus ('0'..'9' | 'a'..'f' | 'A'..'F' | '_')] in

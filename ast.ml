@@ -60,6 +60,9 @@ module Id : ID = struct
 end
 
 module L0 = struct
+
+
+
   module Term = struct
     type varname = string
     module Literal = struct
@@ -79,6 +82,7 @@ module L0 = struct
       | Prod of t list
       | Application of t * t
       | Lambda of varname * t
+      | Lambda' of varname * t
       | Let of varname * t * t
     let rec to_string = function
       | Variable (varname) -> varname
@@ -94,6 +98,22 @@ module L0 = struct
     let let_ v t t' = Let (v,t,t')
     let float f = Literal (Literal.Float f)
     let int i = Literal (Literal.Int i)
+
+
+
+
+
+
+    (* let closure_convert (e:t) : t = function *)
+    (*   | Lambda (v,body) -> *)
+    (*      let s = gensym "env" in *)
+    (*      let v = extend v s in *)
+    (*      let fv = free e in *)
+    (*      let env = create_env in *)
+    (*      let body' = substitute sub body in *)
+    (*      closure (lambda' v body') (mkenvironment env) *)
+
+
   end
 
   (* module Relation = struct *)

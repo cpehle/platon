@@ -12,13 +12,6 @@ type env = {
     env_file : filename;
   }
 
-(**
-
-Utilities
----------
-
- *)
-
 let from_lexbuf lexbuf : env =
   let  first_token = Plexer.token lexbuf in
   let ps = {

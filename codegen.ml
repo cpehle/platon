@@ -8,6 +8,19 @@ type codegen_state = {
   named_values : (string, Llvm.llvalue) Hashtbl.t;
   }
 
+let (>>) f g x = g (f x)
+let (|>) x f   = f x
+
+type 'a func = { func : Llvm.llvalue; context : codegen_state }
+
+let make_function context name returns args f =
+  let fn_type = Llvm.function_type returns args in
+  let fn = Llvm.declare_function name fn_type context.llmodule in
+  let bb = Llvm.append_block context.llcontext "entry" fn in
+  Llvm.position_at_end bb context.llbuilder;
+  f {func = fn; context }
+
+
 
 let rec find_type_representation : codegen_state -> Source.Type.t -> Llvm.lltype
   = fun ctx -> function
@@ -26,7 +39,21 @@ let codegen_literal = fun context -> function
   | Source.Term.Integer i -> Result.Ok (Llvm.const_int (Llvm.integer_type context.llcontext 32) i)
 
 let codegen_select context res = ()
-let codegen_binop context op = ()
+
+
+(** Code generation for operators is slightly subtle, we don't really
+want any build in operations.  *)
+type operator = Add | Mul | Sub
+type base_type = Float | Int
+type operand = {
+    base_type : base_type;
+    value : Llvm.llvalue;
+  }
+let codegen_binop context op o o' = let builder, tmp = match op with
+  | Add -> if o.base_type = Float then Llvm.build_fadd, "faddtmp" else  Llvm.build_add, "addtmp"
+  | Mul -> if o.base_type = Float then Llvm.build_fmul, "fmultmp" else  Llvm.build_fadd, "multmp"
+  | Sub -> if o.base_type = Float then Llvm.build_fsub, "fmultmp" else  Llvm.build_fsub, "subtmp"
+ in builder o.value o'.value tmp context.llbuilder
 
 let rec codegen_term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
   let open Result.Monad_infix in
@@ -99,3 +126,21 @@ let codegen_function context =
     let _ = Llvm.build_ret ret_val context.llbuilder in
     Llvm_analysis.assert_valid_function the_function;
     Result.return the_function
+
+
+
+
+(* let compile_register context load store signal = *)
+(*   let r = match signal with *)
+(*     | Signal_Register (_, r) -> r *)
+(*     | _ -> assert false *)
+(*   in *)
+(*   let name n = name n signal in *)
+(*   let width = width signal in *)
+
+(*   let clr, clr_level, clr_value = *)
+(*     if (r.reg_clear) <> empty then *)
+(*       load r.reg_clear, load r.reg_clear_level, load r.reg_clear_value *)
+(*     else *)
+(*       Llvm.const_int, const_int 1 1, const_int width 0 *)
+(*   let clr = Llvm.build_icmp Llvm.Icmp.Eq clr clr_level *)

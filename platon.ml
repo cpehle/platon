@@ -90,7 +90,7 @@ let () =
       let r = Vgr.create ~warn (Vgr_cairo.stored_target fmt) (`Channel oc) in
       ignore (Vgr.render r (`Image (size, view, image)));
       ignore (Vgr.render r `End););
-      (* Test unionfind *)
+      (** Test unionfind *)
       let open Unionfind in
       let set = make 1000 in
       unite set 12 13;
@@ -102,19 +102,6 @@ let () =
         then print_string "Found\n"
         else print_string "Failed\n"
       in
-      (*
-      let open Tsdl in
-      let () = match Sdl.init Sdl.Init.video with
-        | `Error e -> Sdl.log "Init error: %s" e; exit 1
-        | `Ok () ->
-           match Sdl.create_window ~w:640 ~h:480 "SDL OpenGL" Sdl.Window.opengl with
-           | `Error e -> Sdl.log "Create window error: %s" e; exit 1
-           | `Ok w ->
-              Sdl.delay 3000l;
-              Sdl.destroy_window w;
-              Sdl.quit ();
-      in
-       *)
       colorprintf ~color:`Green "Running tests...\n";
       OUnit2.run_test_tt_main suite;
     end

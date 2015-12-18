@@ -1,5 +1,40 @@
--- This is a comment
+
+
+
+∘: Hom_C (x,y) × Hom_C (y,z) → Hom_C (x,z)
+id_x: Hom_C (x,x)
+
+
+
+inv: C → C 
+Δ: C → C ⊗ C
+m: C ⊗ C → C
+ρ: A ⊗ C → C
+
+
+
+
+(f ⊗ g ⊗ h)
+
+
+
+
+⟨x,y⟩
+
+
+
+
+
+
+
+
+
+
+
+
 let x = y in z
+
+
 -- This is a another comment
 let z = x in p -- in the same line as source code.
 let g = d in q
@@ -15,7 +50,7 @@ f ⊦
 
 
 
-—— This is a comment                                                                                                
+
 
 
 ↑ ↓ ⟨ ⟩ ∈ ∩ ∪ ∨ ∧
@@ -28,7 +63,7 @@ let f x = ⎨ Why not
           ⎩ It is not that hard.
 
 
-let x = function
+x = fn
   | square x →
   | test y →
   | record z →
