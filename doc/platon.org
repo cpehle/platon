@@ -5,10 +5,59 @@
 ∘: Hom_C (x,y) × Hom_C (y,z) → Hom_C (x,z)
 id_x: Hom_C (x,x)
 
+
 inv: C → C 
 Δ: C → C ⊗ C
 m: C ⊗ C → C
 ρ: A ⊗ C → C
+
+
+– Trace operator
+
+! : C → I 
+
+
+
+
+μ θ γ
+
+
+
+
+
+
+
+f: [Δ Δ ∘ id m id ∘ m m]  [Δ ∘ id inv ∘ m] Δ
+g: [Δ                ]
+
+ρ 2 3 4
+
+
+
+τ [
+1 2 3 3 4 5 : vec _ int
+Δ   Δ  Δ
+
+
+σ 2 3 [
+
+
+
+] 
+
+
+
+σ 2 3 [
+
+
+
+]
+
+]
+
+
+inv inv inv id inv id
+m m m 
 
 (f ⊗ g ⊗ h)
 ⟨x,y⟩

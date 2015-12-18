@@ -7,7 +7,6 @@ let test_cases =
   [
     ("", Result.Ok []);
     ("  \t\n\n\t\r\n\r", Result.Ok []);
-
     ("let fn in", Result.Ok [LET; FUN; IN]);
     (";",  lexerror);
     ("~", lexerror);
