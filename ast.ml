@@ -61,8 +61,6 @@ end
 
 module L0 = struct
 
-
-
   module Term = struct
     type varname = string
     module Literal = struct
@@ -75,19 +73,23 @@ module L0 = struct
         | Int i -> Int64.to_string i
         | String s -> "\"" ^ s ^ "\""
     end
-
     type t =
       | Variable of varname
+      | Atom of varname
       | Literal of Literal.t
-      | Prod of t list
+      | Prod of t list (** [e_0 e_1 ... e_n] *)
+      | Comp of t list (** (e_0 e_1 ... e_n) *)
+      | Rel of t list  (** {e_0 e_1 ... e_n} *)
       | Application of t * t
       | Lambda of varname * t
-      | Lambda' of varname * t
       | Let of varname * t * t
     let rec to_string = function
       | Variable (varname) -> varname
       | Literal l -> (Literal.to_string l)
-      | Prod tl -> String.concat ~sep:" " (List.map tl ~f:to_string)
+      | Atom a  -> a
+      | Rel  tl -> "{" ^ String.concat ~sep:" " (List.map tl ~f:to_string) ^ "}"
+      | Comp tl -> "(" ^ String.concat ~sep:" " (List.map tl ~f:to_string) ^ ")"
+      | Prod tl -> "[" ^ String.concat ~sep:" " (List.map tl ~f:to_string) ^ "]"
       | Application (e,e') -> (to_string e) ^ " " ^ (to_string e')
       | Lambda (v,e) -> "fn " ^  v ^ " . " ^ (to_string e)
       | Let (v,e,e') -> "let " ^ v ^ " = " ^ (to_string e) ^ " in " ^ (to_string e')
@@ -98,9 +100,6 @@ module L0 = struct
     let let_ v t t' = Let (v,t,t')
     let float f = Literal (Literal.Float f)
     let int i = Literal (Literal.Int i)
-
-
-
 
 
 

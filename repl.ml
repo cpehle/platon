@@ -3,6 +3,16 @@ open Core_extended.Color_print
 open Core_extended.Readline
 
 
+let top_type_check : Ast.L0.Term.t -> Ast.L0.Type.t = fun exp ->
+  let initial_state = { TypeInference.gensym_counter = 0;
+                        TypeInference.current_level = 0;
+                        TypeInference.to_be_level_adjusted = []} in
+  TypeInference.reset_type_inference_state initial_state;
+  TypeInference.reset_level_adjustment initial_state;
+  let ty = TypeInference.typeof initial_state [] exp in
+  TypeInference.cycle_free ty;
+  ty
+
 let () =
   let open Result.Monad_infix in
   let rec loop filename = fun () ->

@@ -3,12 +3,17 @@ open Ast.L0
 type varname = string
 type env = (varname * Type.t) list
 
+type error =
+  | InternalError of string
+  | OccursCheckFailed
+  | CycleDetected
+
 type type_inference_state = {
   mutable gensym_counter : int;
   mutable current_level  : int;
   mutable to_be_level_adjusted : Type.t list; }
 
-let reset_gensym (s : type_inference_state) = s.gensym_counter <- 0
+ let reset_gensym (s : type_inference_state) = s.gensym_counter <- 0
 let reset_level (s : type_inference_state) = s.current_level <- 1
 let reset_level_adjustment s = s.to_be_level_adjusted <- []
 let reset_type_inference_state s = reset_level s; reset_gensym s

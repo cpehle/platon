@@ -123,9 +123,6 @@ let codegen_function context =
       Llvm_analysis.assert_valid_function the_function;
       Result.return the_function
 
-
-
-
 (* let compile_register context load store signal = *)
 (*   let r = match signal with *)
 (*     | Signal_Register (_, r) -> r *)

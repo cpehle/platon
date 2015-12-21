@@ -2,6 +2,7 @@ open Core.Std
 open Token
 open Lexbuf
 
+
 let fail {pos_start; pos_end} s : (Token.t, Parse_error.t * Position.t * Position.t) Result.t =
   Result.Error (Parse_error.LexError s, pos_start, pos_end)
 

@@ -75,19 +75,16 @@ let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result
   | Token.INT i ->  bump ps; Result.return (Term.Literal (Term.Literal.Int i))
   | Token.LPAREN ->
      bump ps;
-     term ps >>= fun tm ->
-     expect ps Token.RPAREN >>=  fun _ ->
-     Result.return tm
+     term_list ps Token.RPAREN [] >>= fun tms ->
+     Result.return (Term.Comp tms)
   | Token.LBRACE ->
      bump ps;
-     term ps >>= fun tm ->
-     expect ps Token.RBRACE >>= fun _ ->
-     Result.return tm
+     term_list ps Token.RBRACE [] >>= fun tms ->
+     Result.return (Term.Rel tms)
   | Token.LBRACKET ->
      bump ps;
-     term ps >>= fun tm ->
-     expect ps Token.RBRACKET >>= fun _ ->
-     Result.return tm
+     term_list ps Token.RBRACKET [] >>= fun tms ->
+     Result.return (Term.Prod tms)
   | Token.LET -> plet ps
   | Token.FUN -> pfun ps
   | _ as t -> fail ps (Parse_error.UnexpectedToken (Token.to_string t))
@@ -119,7 +116,9 @@ and term_list (ps:env) end_token tl =
   let open Result.Monad_infix in
   peek ps >>= function
   | Token.EOF -> fail ps (Parse_error.UnexpectedToken "<eof>")
-  | t when t = end_token ->  Result.return tl
+  | t when t = end_token ->
+     bump ps;
+     Result.return tl
   | _ -> term ps >>= fun tm ->
     let tl = List.append  tl  [tm] in
     term_list ps end_token tl
