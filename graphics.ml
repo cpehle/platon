@@ -35,9 +35,11 @@ let image =
 
 
 let () =
-         (* This is a test of graphics output. The eventual goal is to develop
-      interactively in the interpreter and get a live view of the
-      computational graph in an output window *)
+  (*
+     This is a test of graphics output. The eventual goal is to develop
+     interactively in the interpreter and get a live view of the
+     computational graph in an output window
+   *)
       Out_channel.with_file "test.png" ~f:(fun oc ->
       let res = 300. /. 0.0254 (* 300dpi in dots per meters *) in
       let fmt = `Png (Size2.v res res) in

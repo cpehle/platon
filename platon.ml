@@ -38,23 +38,7 @@ let codegen_top =
     Result.Ok ()
   end
 
-let id = Ast.L0.Term.fn "x" (Ast.L0.Term.var "x");;
-
 let () =
-  begin
     match codegen_top () with
     | Result.Error err -> print_string (Codegen_error.to_string err);
-    | Result.Ok res ->
-      (** Test unionfind *)
-      let open Unionfind in
-      let set = make 1000 in
-      unite set 12 13;
-      unite set 14 15;
-      unite set 15 16;
-      unite set 12 15;
-      let () =
-        if find set 13 14
-        then print_string "Found\n"
-        else print_string "Failed\n"
-      in ()
-    end
+    | Result.Ok res -> ()

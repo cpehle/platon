@@ -1,9 +1,128 @@
+* Reducers / State
+
+A simple way to represent state changes is by reducers, that is pure functions
+
+f : (state, action) -> state
+
+state  action 
+\     . 
+ \   . 
+  \ .
+   |
+   | 
+   |
+  state
+
+
+Now lets suppose that the set of actions satisfies some additional
+laws, for example that one can compose to actions to get a new action
+
+action    action
+ .        .  
+  .     .  
+   .  . 
+    .
+    .
+    .
+ action
+
+Simplest example would be a non-commutative monoid with identity.
+
+
+Identity: No action
+
+  id 
+  .
+  .
+  .
+
+
+Emitter:
+
+   state
+    |
+    |
+    |
+   / .
+  /   .
+ /     .
+state signal 
+
+
+
+
+
+
+\     . 
+ \   . 
+  \ .
+   |
+   | 
+   |
+   |
+   |
+   |
+  / .    
+ /   .   
+/     .  
+
+
+
+Now suppose we wanted to explicitely keep track of time, for the
+moment we will think of time as being given by the integers
+\(time = \mathbf{Z}\). All possible states of the system are then given by the product
+
+state × time
+
+there are canonical projections p and q
+
+p : state × time → state
+
+and
+
+q : state × time → time
+
+given a function f : state × action → state and a map s0 : {0} → state, the "initial state" and a function
+
+a : time → action
+
+We can produce a section s : time → state as follows
+
+s(i) = f(s(i-1),a(i))
+
+
+
+Now suppose we are several reducers
+
+f_{k} : state_k × action_{k} → state_{k}
+
+
+
+
+
+
+
+Arbiter
+
+
+arbiter : state × request × enable → state × select × grant × valid
+
+arb_{2} : state_{2} × request_{2} × enable → state × select × grant_{2} × valid
+
+state = { last : Bit(1) }
+
+arb_{2} state req en = ~en ? (state × state.last × 0) : ()
+
+
+
+
+
 * Syntax
 
--- This is a comment
 
 ∘: Hom_C (x,y) × Hom_C (y,z) → Hom_C (x,z)
 id_x: Hom_C (x,x)
+
 
 
 inv: C → C 
@@ -12,27 +131,115 @@ m: C ⊗ C → C
 ρ: A ⊗ C → C
 
 
+
+-- Monad is an endo functor
+T: C → C
+-- together with two natural transformation
+pure: I → T 
+join: T² → T
+
+         |      |
+         |      | 
+          \    /
+           join
+            | 
+            | 
+
+            
+           pure  
+            |
+            |
+
+
+
+
+
+
+
+
+
+
+
+
+fmap : Functor f => (a -> b) -> f a -> f b
+
+
+If f : T a -> b
+then fmap f : T (T a) -> T b
+
+
+
+
+
+
+
+(T(f) join)
+
+
+(>>=): T a → (T a → b) → T b
+a >>= f = join (fmap f a)
+
+T a ⊗ (a, T b ) → T b
+
+
+fmap: (a,b) → (T a, T b)
+
+h : a → T b 
+
+(T(f g) h T())
+
+
+
+-- Input is a T a, where a is an object in C
+
+
+
+([T μ] μ)
+([μ T] μ)
+
+(
+[a₀ a₁] -- T t₀ ⊗ T t₁
+
+
+
+T(g f) -- g: A → B, f: B → C, T(g f): T A → T C
+
+
+)
+
+
+([μ T] μ)
+([T μ] μ)
+
+([η T] μ) 
+
+id
+
+([T η] μ)
+
 – Trace operator
 
 ! : C → I 
 
 
+-- One way data flow
+(
+ init 
+ Δ
+ [f g]
+ scatter
+ [h₀ h₁ h₂]
+ gather
+ c
+)
 
+
+
+-- Hom(X ⊗ A, X ⊗ B) → Hom(A,B)
+
+[trace (i) (f Δ [ ] +)]
 
 μ θ γ
-
-
-–
-
-Phone : Type = Record [name : Text, number : Integer]
-
-Phone["Christian Pehle", 015117812572]
-
-mux   :
-
-arb   :
-
-
 
 
 g = (Δ                ) (    )
@@ -54,14 +261,6 @@ N σ v
 
 N – Is a potentially nested tensor.
 
-
-
-
-
-
-
-
-{phone: 123421}
 
 
 
@@ -107,7 +306,7 @@ f ⊦ s d
 
 ↑ ↓ ⟨ ⟩ ∈ ∩ ∪ ∨ ∧ ←
 
-“This is a string” -- It uses the non-typewriter convention different opening and closing quotes.
+
 
 
       ⎧ 

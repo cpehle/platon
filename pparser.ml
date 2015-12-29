@@ -48,29 +48,13 @@ let ident (ps:env) : (string * Position.t * Position.t, Parse_error.t * Position
                           Result.return (id, ps.env_lexbuf.Lexbuf.pos_start, ps.env_lexbuf.Lexbuf.pos_end)
       | _ as token -> fail ps (Parse_error.UnexpectedTokenWithExpectation (Token.to_string token, "identifier"))
 
-let rec ptype (ps:env) : (Type.t, Parse_error.t * Position.t * Position.t) Result.t =
-  let open Result.Monad_infix in
-  peek ps >>= fun token -> match token with
-  | Token.IDENT s -> ptype0 (Type.QVar s) ps
-  | Token.LPAREN ->
-     ptype ps >>= fun t ->
-     expect ps Token.LPAREN >>= fun _ ->
-     Result.return t
-  | _ as token -> fail ps  (Parse_error.UnexpectedToken (Token.to_string token))
-and ptype0 t1 ps =
-  let open Result in
-  let open Result.Monad_infix in
-  peek ps >>= fun token -> match token with
-                           | Token.RIGHTARROW ->
-                              ptype ps >>= fun t2 -> return  (Type.TArrow (t1, t2, Type.default_levels))
-                           | _ -> return t1
-
 let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   peek ps >>= function
   | Token.IDENT id ->
      ident ps >>= fun (id,p,p') ->
      Result.return  (Term.Variable id)
+  | Token.STRING s -> bump ps; Result.return (Term.Literal (Term.Literal.String s))
   | Token.FLOAT f -> bump ps; Result.return (Term.Literal (Term.Literal.Float f))
   | Token.INT i ->  bump ps; Result.return (Term.Literal (Term.Literal.Int i))
   | Token.LPAREN ->

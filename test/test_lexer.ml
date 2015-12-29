@@ -4,12 +4,14 @@ open Token
 
 let test_cases =
   let lexerror = Result.Error (Parse_error.LexError "Unexpected character", Position.default_position, Position.default_position) in
+  let ok x = Result.Ok x in
   [
-    ("", Result.Ok []);
-    ("  \t\n\n\t\r\n\r", Result.Ok []);
-    ("let fn in", Result.Ok [LET; FUN; IN]);
+    ("", ok []);
+    ("  \t\n\n\t\r\n\r", ok []);
+    ("let fn in", ok [LET; FUN; IN]);
     (";",  lexerror);
     ("~", lexerror);
+    ("12.1", ok [FLOAT 12.1]);
     ("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
     ("forall", Result.Ok [FORALL]);
     ("module", Result.Ok [MODULE]);
