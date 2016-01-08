@@ -1,6 +1,5 @@
 all: repl.native platon.native test.native
 
-
 SOURCES:=pparser.ml plexer.ml platon.ml codegen.ml position.ml		\
 parse_error.ml codegen_error.ml ast.ml circuit.ml repl.ml token.ml	\
 unionfind.ml typeInference.ml

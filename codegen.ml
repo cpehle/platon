@@ -14,7 +14,7 @@ let (|>) x f   = f x
 
 type 'a func = { func : Llvm.llvalue; context : codegen_state }
 
-let make_function context name returns args f =
+let cgfunction context name returns args f =
     let fn_type = Llvm.function_type returns args in
     let fn = Llvm.declare_function name fn_type context.llmodule in
     let bb = Llvm.append_block context.llcontext "entry" fn in
@@ -30,14 +30,14 @@ let rec find_type_representation : codegen_state -> Source.Type.t -> Llvm.lltype
                  | Source.Type.Integer -> (Llvm.integer_type ctx.llcontext 32) end
         | Source.Type.Arrow (t,t') -> (Llvm.integer_type ctx.llcontext 32)
 
-let codegen_struct context array =
+let cgstruct context array =
     Llvm.struct_type context array
 
-let codegen_literal = fun context -> function
+let literal = fun context -> function
     | Source.Term.Double d -> Result.Ok (Llvm.const_float (Llvm.double_type context.llcontext) d)
     | Source.Term.Integer i -> Result.Ok (Llvm.const_int (Llvm.integer_type context.llcontext 32) i)
 
-let codegen_select context res = ()
+let select context res = ()
 
 type operator = Add | Mul | Sub
 type base_type = Float | Int
@@ -46,26 +46,26 @@ type operand = {
     value : Llvm.llvalue;
   }
 
-let codegen_binop context op o o' = let builder, tmp = match op with
+let cgbinop context op o o' = let builder, tmp = match op with
   | Add -> if o.base_type = Float then Llvm.build_fadd, "faddtmp" else  Llvm.build_add, "addtmp"
   | Mul -> if o.base_type = Float then Llvm.build_fmul, "fmultmp" else  Llvm.build_fadd, "multmp"
   | Sub -> if o.base_type = Float then Llvm.build_fsub, "fmultmp" else  Llvm.build_fsub, "subtmp"
  in builder o.value o'.value tmp context.llbuilder
 
-let rec codegen_term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
+let rec term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
   let open Result.Monad_infix in
   fun context ->
   function
   | Source.Term.Trace _ -> Result.Error (Codegen_error.Error ("Not implemented: Trace"))
-  | Source.Term.Literal l -> codegen_literal context l
+  | Source.Term.Literal l -> literal context l
   | Source.Term.Variable name -> begin
       match Hashtbl.find context.named_values name with
       | Some r -> Result.Ok r
       | None -> Result.Error (Codegen_error.Error ("Unbound variable: " ^ name))
     end
   | Source.Term.Binary (op,t,x,y) ->
-    codegen_term context x >>= fun x' ->
-    codegen_term context y >>= fun y' ->
+    term context x >>= fun x' ->
+    term context y >>= fun y' ->
     let llvm_ty = find_type_representation context t in
     begin
       match op with
@@ -85,7 +85,7 @@ let rec codegen_term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_
     if phys_equal (Array.length params) (Array.length args) then
       Result.Error (Codegen_error.Error "incorrect # arguments passed")
     else
-      Result.all (Array.to_list (Array.map args ~f:(codegen_term context))) >>| List.to_array >>= fun args ->
+      Result.all (Array.to_list (Array.map args ~f:(term context))) >>| List.to_array >>= fun args ->
       Result.Ok (Llvm.build_call callee args "calltmp" context.llbuilder)
 
 
@@ -118,22 +118,8 @@ let codegen_function context =
       codegen_proto context proto >>= fun the_function ->
       let bb = Llvm.append_block context.llcontext "entry" the_function in
       Llvm.position_at_end bb context.llbuilder;
-      codegen_term context body >>= fun ret_val ->
+      term context body >>= fun ret_val ->
       let _ = Llvm.build_ret ret_val context.llbuilder in
       Llvm_analysis.assert_valid_function the_function;
       Result.return the_function
 
-(* let compile_register context load store signal = *)
-(*   let r = match signal with *)
-(*     | Signal_Register (_, r) -> r *)
-(*     | _ -> assert false *)
-(*   in *)
-(*   let name n = name n signal in *)
-(*   let width = width signal in *)
-
-(*   let clr, clr_level, clr_value = *)
-(*     if (r.reg_clear) <> empty then *)
-(*       load r.reg_clear, load r.reg_clear_level, load r.reg_clear_value *)
-(*     else *)
-(*       Llvm.const_int, const_int 1 1, const_int width 0 *)
-(*   let clr = Llvm.build_icmp Llvm.Icmp.Eq clr clr_level *)

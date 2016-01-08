@@ -69,24 +69,23 @@ let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result
      bump ps;
      term_list ps Token.RBRACKET [] >>= fun tms ->
      Result.return (Term.Prod tms)
-  | Token.LET -> plet ps
+  | Token.LET ->
+       let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
+       expect ps (Token.LET) >>= fun _ ->
+       ident ps >>| (fun (id,p,p') -> id) >>= fun v ->
+       expect ps (Token.EQUALS) >>= fun _ ->
+       term_list ps (Token.IN) [] >>| Term.prod >>= fun tm ->
+       expect ps (Token.IN) >>= fun _ ->
+       term ps >>= fun body ->
+       let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
+       Result.return (Term.Let (v, tm, body))
   | Token.FUN -> pfun ps
   | _ as t -> fail ps (Parse_error.UnexpectedToken (Token.to_string t))
 and application (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   ident ps >>| (fun (id,p,p') -> id) >>| Term.var >>= fun fn ->
   ident ps >>| (fun (id,p,p') -> id) >>| Term.var >>= fun var -> Result.return (Term.Application (fn, var))
-and plet (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
-  let open Result.Monad_infix in
-  let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
-  expect ps (Token.LET) >>= fun _ ->
-  ident ps >>| (fun (id,p,p') -> id) >>= fun v ->
-  expect ps (Token.EQUALS) >>= fun _ ->
-  term_list ps (Token.IN) [] >>| Term.prod >>= fun tm ->
-  expect ps (Token.IN) >>= fun _ ->
-  term ps >>= fun body ->
-  let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
-  Result.return (Term.Let (v, tm, body))
+
 and pfun (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
