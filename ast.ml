@@ -40,7 +40,6 @@ module L0 = struct
     let let_ v t t' = Let (v,t,t')
     let float f = Literal (Literal.Float f)
     let int i = Literal (Literal.Int i)
-
   end
 
   module Type = struct
@@ -79,6 +78,7 @@ module L1 = struct
       | Base of base
       | Arrow of t * t
   end
+
   module Term = struct
     type varname = string
 
@@ -106,5 +106,4 @@ module L1 = struct
     let string_of_func : func -> string = function
       | Function (Prototype (s, ss), t) -> s ^ "[" ^ String.concat ~sep:" " (Array.to_list ss) ^ "]" ^ "->" ^ to_string t
   end
-
 end
