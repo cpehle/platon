@@ -1,66 +1,6 @@
 open Core.Std
-(*
-module type IDENT = sig
-  type t
-  val create: string -> t
-  val name: t -> string
-  val equal: t -> t -> bool
-  type 'a tbl
-  val emptytbl: 'a tbl
-  val add: t -> 'a -> 'a tbl -> 'a tbl
-  val find: t -> 'a tbl -> 'a
-end
-
-module Ident : IDENT = struct
-  type t = {name: string; stamp: int}
-  let currstamp = ref 0
-  let create s =
-    currstamp := !currstamp + 1; {name = s; stamp = !currstamp}
-  let name id = id.name
-  let equal id1 id2 = (id1.stamp = id2.stamp)
-  type 'a tbl = (t * 'a) list
-  let emptytbl = []
-  let add id data tbl = (id, data) :: tbl
-  let rec find id1 = function
-    |  [] -> raise Not_found
-    | (id2, data) :: rem ->
-       if equal id1 id2 then data else find id1 rem
-end
-
-
-
-module type SUBST = sig
-  type t
-  val identity: t
-  val add: Ident.t -> path -> t -> t val path: path -> t -> path
-end *)
-
-module type ID = sig
-  type t
-  val create : string -> t
-  val name : t -> string
-end
-
-module Id : ID = struct
-  type t = { id : int; name : string}
-
-  let current_id = ref 0
-
-  let name i = i.name
-
-  let create s =
-    incr current_id;
-    { name = s; id = !current_id}
-
-  let rename i =
-    incr current_id;
-    { i with id = !current_id}
-
-  let same i1 i2 = i1 = i2
-end
 
 module L0 = struct
-
   module Term = struct
     type varname = string
     module Literal = struct
@@ -101,42 +41,7 @@ module L0 = struct
     let float f = Literal (Literal.Float f)
     let int i = Literal (Literal.Int i)
 
-
-
-    (* let closure_convert (e:t) : t = function *)
-    (*   | Lambda (v,body) -> *)
-    (*      let s = gensym "env" in *)
-    (*      let v = extend v s in *)
-    (*      let fv = free e in *)
-    (*      let env = create_env in *)
-    (*      let body' = substitute sub body in *)
-    (*      closure (lambda' v body') (mkenvironment env) *)
-
-
   end
-
-  (* module Relation = struct *)
-  (*   type constant = string *)
-  (*   type variable = { name : Core.Std.String.t; level : Core.Std.Int.t} *)
-  (*   type t = *)
-  (*     | Var of variable *)
-  (*     | Const of constant *)
-  (*     | App of constant * t Core.Std.List.t *)
-  (*   type atom = constant * t Core.Std.List.t *)
-  (*   type clause = atom Core.Std.List.t *)
-  (*   type assertion = atom * clause *)
-
-  (*   let compare_var { name = vn; level = vl } { name = vn'; level = vl' } = *)
-  (*     let cs = (String.compare vn vn') in if (cs = 0) then Int.compare vl vl' else cs *)
-
-  (*   type database = assertion Core.Std.List.t *)
-  (*   let rec subst_relation env = function *)
-  (*     | Var x as e -> *)
-  (*        (let e' = Core.Std.String.Map.find env x in *)
-  (*         if e = e' then e' else subst_relation env e') *)
-  (*     | Const _ as e -> e *)
-  (*     | App (c, ls) -> App (c, List.map ~f:(subst_relation env)) *)
-  (* end *)
 
   module Type = struct
     type qname = string

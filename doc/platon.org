@@ -1,127 +1,85 @@
-* Reducers / State
+* Syntax
+** Categories
 
-A simple way to represent state changes is by reducers, that is pure functions
+The syntax of platon is adapted to category theory: In a category C
+there are objects x,y ∈ C and arrows or morphisms Hom_C(x,y) between
+objects. The only operations are composition, which is required to be
+associative
 
-f : (state, action) -> state
+∘: Hom_C (x,y) × Hom_C (y,z) → Hom_C (x,z)
 
-state  action 
-\     . 
- \   . 
-  \ .
-   |
-   | 
-   |
-  state
+and for each object x ∈ C the set of morphisms Hom_C(x,x) needs to
+contain an identity morphism
 
+id_x: Hom_C (x,x).
 
-Now lets suppose that the set of actions satisfies some additional
-laws, for example that one can compose to actions to get a new action
+In platon given morphisms f ∈ Hom_C(a,b), g ∈ Hom_C(b,c) and h ∈
+Hom_C(c,d) their composition is written as
 
-action    action
- .        .  
-  .     .  
-   .  . 
-    .
-    .
-    .
- action
+(f g h)
 
-Simplest example would be a non-commutative monoid with identity.
+Alternatively you
 
-
-Identity: No action
-
-  id 
-  .
-  .
-  .
-
-
-Emitter:
-
-   state
-    |
-    |
-    |
-   / .
-  /   .
- /     .
-state signal 
+1 2 3 4 . + + . + 
 
 
 
+Notice that this notation already incorporates the fact that
+composition is associative.
 
+** Functors and natural transformations as examples of 2-categories
 
+Now given a covariant functor F : C → D, again because of the functor laws, we can denote
+the composition of Ff, Fg and Fh by
 
-\     . 
- \   . 
-  \ .
-   |
-   | 
-   |
-   |
-   |
-   |
-  / .    
- /   .   
-/     .  
+F(f g h) == (Ff Fg Fh)
 
+Since functors also compose, we can denote the composition of functors
+F : C → D and, G : D → E 
 
+[F G](f g h)
 
-Now suppose we wanted to explicitely keep track of time, for the
-moment we will think of time as being given by the integers
-\(time = \mathbf{Z}\). All possible states of the system are then given by the product
+Now categories, functors and natural transformations form a
+2-category, essentially there are two kinds of composition:
 
-state × time
+Given functors F : C → D, G : C → D and H : C → D and natural
+transformations η : F ⇒ G and μ : G ⇒ H we can compose (η μ), but
+given functors F : C → D, G : C → D, H : D → E, I : D → E and natural
+transformations η : F ⇒ H and μ : G ⇒ I, we can also compose them in a
+second way [η μ], then
 
-there are canonical projections p and q
-
-p : state × time → state
+([F G] [η μ]) == [H I]
 
 and
 
-q : state × time → time
+(F η μ) == H
 
-given a function f : state × action → state and a map s0 : {0} → state, the "initial state" and a function
+in the first case.
 
-a : time → action
+Graphically the two forms of composition can be written as, this is an
+example of a monoidal category
 
-We can produce a section s : time → state as follows
+|       
+|       
+η
+|
+|
+μ
+|
+| 
+            
 
-s(i) = f(s(i-1),a(i))
-
-
-
-Now suppose we are several reducers
-
-f_{k} : state_k × action_{k} → state_{k}
-
-
-
-
-
-
-
-Arbiter
-
-
-arbiter : state × request × enable → state × select × grant × valid
-
-arb_{2} : state_{2} × request_{2} × enable → state × select × grant_{2} × valid
-
-state = { last : Bit(1) }
-
-arb_{2} state req en = ~en ? (state × state.last × 0) : ()
+|     |
+|     |
+η     μ
+|     |
+|     |
 
 
 
 
 
-* Syntax
 
-
-∘: Hom_C (x,y) × Hom_C (y,z) → Hom_C (x,z)
-id_x: Hom_C (x,x)
 
 
 
@@ -131,10 +89,13 @@ m: C ⊗ C → C
 ρ: A ⊗ C → C
 
 
+** Monads
+
 
 -- Monad is an endo functor
 T: C → C
 -- together with two natural transformation
+
 pure: I → T 
 join: T² → T
 
@@ -144,6 +105,11 @@ join: T² → T
            join
             | 
             | 
+
+([T T] join)
+
+([T T T] [join id] join) == ([T T T] [id join] join)
+
 
             
            pure  
@@ -307,16 +273,124 @@ f ⊦ s d
 ↑ ↓ ⟨ ⟩ ∈ ∩ ∪ ∨ ∧ ←
 
 
+* Reducers / State
+
+A simple way to represent state changes is by reducers, that is pure functions
+
+f : (state, action) -> state
+
+state  action 
+\     . 
+ \   . 
+  \ .
+   |
+   | 
+   |
+  state
 
 
-      ⎧ 
-f x = ⎨ 
-      ⎩ 
+Now lets suppose that the set of actions satisfies some additional
+laws, for example that one can compose to actions to get a new action
+
+action × action → action
+
+```
+ .        .  
+  .     .  
+   .  . 
+    .
+    .
+    .
+```
 
 
-x = fn
-  | square x →
-  | test y →
-  | record z →
-  | var y →
+Simplest example would be a non-commutative monoid with identity.
+
+
+Identity: No action
+
+  id 
+  .
+  .
+  .
+
+
+Emitter:
+
+   state
+    |
+    |
+    |
+   / .
+  /   .
+ /     .
+state signal 
+
+
+
+
+
+
+\     . 
+ \   . 
+  \ .
+   |
+   | 
+   |
+   |
+   |
+   |
+  / .    
+ /   .   
+/     .  
+
+
+
+Now suppose we wanted to explicitely keep track of time, for the
+moment we will think of time as being given by the integers
+\(time = \mathbf{Z}\). All possible states of the system are then given by the product
+
+state × time
+
+there are canonical projections p and q
+
+p : state × time → state
+
+and
+
+q : state × time → time
+
+given a function f : state × action → state and a map s0 : {0} → state, the "initial state" and a function
+
+a : time → action
+
+We can produce a section s : time → state as follows
+
+s(i) = f(s(i-1),a(i))
+
+
+
+Now suppose we are several reducers
+
+f_{k} : state_k × action_{k} → state_{k}
+
+
+
+
+
+
+
+Arbiter
+
+
+arbiter : state × request × enable → state × select × grant × valid
+
+arb_{2} : state_{2} × request_{2} × enable → state × select × grant_{2} × valid
+
+state = { last : Bit(1) }
+
+arb_{2} state req en = ~en ? (state × state.last × 0) : ()
+
+
+
 

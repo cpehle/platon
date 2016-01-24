@@ -1,5 +1,6 @@
 *~
-_build/
-_tags/
+/_build/
 *.byte
 *.native
+*.cm?
+travis-opam

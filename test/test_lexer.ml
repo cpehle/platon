@@ -12,6 +12,7 @@ let test_cases =
     (";",  lexerror);
     ("~", lexerror);
     ("12.1", ok [FLOAT 12.1]);
+    ("[12.1 12 23.23 1.233]", ok [LBRACKET; FLOAT 12.1; INT (Int.to_int64 12); FLOAT 23.23; FLOAT 1.233; RBRACKET]);
     ("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
     ("forall", Result.Ok [FORALL]);
     ("module", Result.Ok [MODULE]);

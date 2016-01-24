@@ -62,6 +62,7 @@ let to_string t = match t with
                     | EOF -> "(end of file)"
                     | MINUS -> "-"
                     | PLUS -> "+"
+                    | WHERE -> "where"
                     | PIPE -> "|"
                     | SPACES -> "<spaces>"
                     | COLON -> ","

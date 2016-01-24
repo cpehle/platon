@@ -1,22 +1,6 @@
 language: c
 sudo: false
-install: true
-
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise
-    - llvm-toolchain-precise-3.7
-    packages:
-    - llvm-3.7
-
-before_script:
-  - mkdir bin
-  - wget https://github.com/ocaml/opam/releases/download/1.2.2/opam-1.2.2-x86_64-Linux -O $PWD/bin/opam
-  - export PATH=$PATH:$PWD/bin/
-  - chmod +x $PWD/bin/opam
-
-script: bash -ex .travis-ocaml.sh
-env:
-  - DEPS="llvm core core_extended sedlex" BUILD_CMD="make"
+before_install:
+    - wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s "${HOME}/bin"
+    - opam init --yes --comp '4.02.3'
+    - eval $(opam config env)
