@@ -54,6 +54,9 @@ let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result
   | Token.IDENT id ->
      ident ps >>= fun (id,p,p') ->
      Result.return  (Term.Variable id)
+  | Token.ATOM id ->
+     bump ps;
+     Result.return (Term.Atom id)
   | Token.STRING s -> bump ps; Result.return (Term.Literal (Term.Literal.String s))
   | Token.FLOAT f -> bump ps; Result.return (Term.Literal (Term.Literal.Float f))
   | Token.INT i ->  bump ps; Result.return (Term.Literal (Term.Literal.Int i))

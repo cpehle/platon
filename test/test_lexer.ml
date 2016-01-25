@@ -10,14 +10,15 @@ let test_cases =
     ("  \t\n\n\t\r\n\r", ok []);
     ("let fn in", ok [LET; FUN; IN]);
     (";",  lexerror);
-    ("~", lexerror);
+    ("~", ok [ATOM "~"]);
     ("12.1", ok [FLOAT 12.1]);
     ("[12.1 12 23.23 1.233]", ok [LBRACKET; FLOAT 12.1; INT (Int.to_int64 12); FLOAT 23.23; FLOAT 1.233; RBRACKET]);
     ("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
+
     ("forall", Result.Ok [FORALL]);
     ("module", Result.Ok [MODULE]);
     ("→", Result.Ok [RIGHTARROW]);
-    ("())in,let_ Ma ->==", Result.Ok [LPAREN; RPAREN; RPAREN; IN; COMMA; IDENT "let_"; IDENT "Ma"; RIGHTARROW; EQUALS; EQUALS]);
+    (* ("())in,let_ Ma ->==", Result.Ok [LPAREN; RPAREN; RPAREN; IN; COMMA; IDENT "let_"; IDENT "Ma"; RIGHTARROW; EQUALS; EQUALS]); *)
     ("12312313 12.32 \"string\"", Result.Ok [INT (Int64.of_int 12312313); FLOAT 12.32; STRING "string"])
   ]
 

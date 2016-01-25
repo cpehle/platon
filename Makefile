@@ -7,9 +7,8 @@ unionfind.ml typeInference.ml test.ml
 TESTS:=test/*.ml
 
 
-test: test.native
-	./test.native
-
+test: test.byte
+	./test.byte
 test.byte: $(TESTS) $(SOURCES)
 	ocamlbuild -I test/ -j 4 -use-ocamlfind -tag thread -package gg,vg,vg.cairo -package core -package tsdl -package core_extended -package sedlex -package sedlex.ppx -package llvm.scalar_opts -package llvm -package llvm.executionengine -package oUnit test.byte
 test.native: $(TESTS) $(SOURCES)
@@ -20,6 +19,13 @@ repl.native: $(SOURCES)
 
 platon.native: $(SOURCES)
 	ocamlbuild -I test/ -j 4 -use-ocamlfind -tag thread -package gg,vg,vg.cairo -package core -package tsdl -package core_extended -package sedlex -package sedlex.ppx -package llvm.scalar_opts -package llvm -package llvm.executionengine -package oUnit platon.native
+
+repl.byte: $(SOURCES)
+	ocamlbuild -j 4 -use-ocamlfind -tag thread -package gg,vg,vg.cairo -package core -package tsdl -package core_extended -package sedlex -package sedlex.ppx -package llvm.scalar_opts -package llvm -package llvm.executionengine -package oUnit repl.byte
+
+platon.byte: $(SOURCES)
+	ocamlbuild -I test/ -j 4 -use-ocamlfind -tag thread -package gg,vg,vg.cairo -package core -package tsdl -package core_extended -package sedlex -package sedlex.ppx -package llvm.scalar_opts -package llvm -package llvm.executionengine -package oUnit platon.byte
+
 
 clean:
 	ocamlbuild -clean

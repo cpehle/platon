@@ -22,6 +22,7 @@ type t = LET
        | INT of Int64.t
        | FLOAT of float
        | IDENT of string
+       | ATOM of string
        | STRING of string
        | SPACES
        | RIGHTARROW
@@ -55,7 +56,8 @@ let to_string t = match t with
                     | FLOAT f -> Float.to_string f
                     | INT i -> Int64.to_string i
                     | COMMA -> ","
-                    | IDENT s -> "identifier"
+                    | IDENT s -> "ident(" ^ s ^ ")"
+                    | ATOM s -> "atom(" ^ s ^ ")"
                     | RIGHTARROW -> "→"
                     | EQUALS -> "="
                     | FUN -> "fun"
