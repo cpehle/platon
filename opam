@@ -1,0 +1,11 @@
+opam-version: "1.2"
+maintainer:   "christian.pehle@kip.uni-heidelberg.de"
+homepage:     "https://github.com/cpehle/platon"
+bug-reports:  "https://github.com/cpehle/platon/issues"
+dev-repo:     "https://github.com/cpehle/platon.git"
+
+authors: [
+  "Christian Pehle"  
+]
+
+build: [make]

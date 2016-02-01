@@ -1,46 +1,90 @@
 * Syntax
 ** Categories
 
-The syntax of platon is adapted to category theory: In a category C
-there are objects x,y ∈ C and arrows or morphisms Hom_C(x,y) between
-objects. The only operations are composition, which is required to be
-associative
+The syntax of platon is adapted to category theory. While it is not
+strictly nescessary to understand category theory for using platon, we
+nevertheless provide a short overview of the basic definitions in the
+following.
 
-∘: Hom_C (x,y) × Hom_C (y,z) → Hom_C (x,z)
+A category \(C\) is a class of objects \(Ob(C)\) and for every two objects \(x, y \in Ob(C)\) a set of arrows \(Arr_C(x,y)\).
+Arrows can be composed by a family of maps
 
-and for each object x ∈ C the set of morphisms Hom_C(x,x) needs to
-contain an identity morphism
+$$
+∘_{x y z}: Arr_C (x,y) × Arr_C (y,z) → Arr_C (x,z),
+$$
 
-id_x: Hom_C (x,x).
+which are required to be associative. 
 
-In platon given morphisms f ∈ Hom_C(a,b), g ∈ Hom_C(b,c) and h ∈
-Hom_C(c,d) their composition is written as
+In addition for each object \(x\) in \(C\) the set of arrows
+Arr_C(x,x) needs to contain an identity morphism
+
+$$
+id_x: Arr_C (x,x),
+$$
+
+which is required to be a unit with respect to composition, that is
+for all arrows \( f \in Arr(y,x) \):
+
+$$
+id_x \circ f = f = f \circ id_y.
+$$
+
+In platon given morphisms f ∈ Arr_C(a,b), g ∈ Arr_C(b,c) and h ∈
+Arr_C(c,d) their composition is written as
 
 (f g h)
 
-Alternatively you
-
-1 2 3 4 . + + . + 
-
-
-
-Notice that this notation already incorporates the fact that
+This notation already incorporates the fact that
 composition is associative.
+
 
 ** Functors and natural transformations as examples of 2-categories
 
-Now given a covariant functor F : C → D, again because of the functor laws, we can denote
-the composition of Ff, Fg and Fh by
+Given two categories \(C\) und \(D\) a covariant functor \(F : C \to D\)
+associates to every object \(x\) in \(C\) an object \(F(x)\) in \(D\)
+and to every arrow \(f \in Arr_C(x,y) \) an arrow \(Ff \in Arr_D(Fx,
+Fy)\) in such a way that associativity and identity are respected, that is
+an arrow
 
-F(f g h) == (Ff Fg Fh)
+f : x → y
 
-Since functors also compose, we can denote the composition of functors
-F : C → D and, G : D → E 
+is mapped to an arrow 
 
-[F G](f g h)
+Ff : F x → F y
 
-Now categories, functors and natural transformations form a
-2-category, essentially there are two kinds of composition:
+Since functors respect associativity and identity, it makes sense to write
+
+F(f g h) 
+
+to denote the composition of Ff, Fg and Fh in D.
+
+Functors itself can also be composed, that is given functors
+F : C → D and G : D → E, their composition will be denoted by
+[F G]. The reason for this notation will become clear in a moment.
+
+
+TODO Add better explanation of natural transformations
+
+Given two functors F : C → D and G : C → D, 
+a natural transformation μ : F ⇒ G maps for every object x in C
+F(x) to G(x) and for every morphism f : x → y, the diagram
+
+F(x) → F(y)
+ |      |  
+ μ      μ 
+ |      |
+G(x) → G(y)
+
+is supposed to commute.
+
+Functors and natural transformations form a category of their own,
+where functors are the objects and natural transformations are the
+arrows. So it makes sense to write (F μ η). However we have seen above
+that there is anoter way to compose functors themselves, which we
+denoted by [F G]. In fact it is also possible to compose natural
+transformations in a second way [η μ] and one has
+
+[(F η) (G μ)] = ([F G] [η μ])
 
 Given functors F : C → D, G : C → D and H : C → D and natural
 transformations η : F ⇒ G and μ : G ⇒ H we can compose (η μ), but
@@ -48,18 +92,10 @@ given functors F : C → D, G : C → D, H : D → E, I : D → E and natural
 transformations η : F ⇒ H and μ : G ⇒ I, we can also compose them in a
 second way [η μ], then
 
-([F G] [η μ]) == [H I]
+Graphically the two forms of composition can be written as follows
 
-and
 
-(F η μ) == H
-
-in the first case.
-
-Graphically the two forms of composition can be written as, this is an
-example of a monoidal category
-
-|       
+|      
 |       
 η
 |
@@ -76,9 +112,12 @@ example of a monoidal category
 |     |
 
 
-
-
-
+(
+ (f [F G](h j) g)
+ lift 
+ [_ η _]
+ lower
+)
 
 
 
@@ -87,6 +126,24 @@ inv: C → C
 Δ: C → C ⊗ C
 m: C ⊗ C → C
 ρ: A ⊗ C → C
+
+
+** Examples
+
+*** k-Algebras
+
+[A · + k]
+
+[A + k] is a k vector space
+
+*** Hopf Algebra
+
+{[H + · η Δ ε k] [_ ([H H] H) ([H H] H) (k H) (H [H H])]} 
+
+
+
+
+
 
 
 ** Monads

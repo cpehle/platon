@@ -36,6 +36,7 @@ module L0 = struct
     let var x = Variable x
     let app t t' = Application (t, t')
     let prod tl  = Prod tl
+    let comp tl = Comp tl
     let fn v t = Lambda (v,t)
     let let_ v t t' = Let (v,t,t')
     let float f = Literal (Literal.Float f)
