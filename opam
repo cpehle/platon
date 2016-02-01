@@ -1,11 +1,18 @@
 opam-version: "1.2"
-maintainer:   "christian.pehle@kip.uni-heidelberg.de"
-homepage:     "https://github.com/cpehle/platon"
-bug-reports:  "https://github.com/cpehle/platon/issues"
-dev-repo:     "https://github.com/cpehle/platon.git"
-
-authors: [
-  "Christian Pehle"  
-]
-
+name: "platon"
+version: "0.1"
+maintainer: "christian.pehle@kip.uni-heidelberg.de"
+authors: "Christian Pehle"
+homepage: "https://github.com/cpehle/platon"
+bug-reports: "https://github.com/cpehle/platon/issues"
+dev-repo: "https://github.com/cpehle/platon.git"
 build: [make]
+build-test: [make "test"]
+depends: [
+  "llvm"
+  "sedlex"
+  "core"
+  "core_extended"
+  "ounit" {test}
+  "ocamlfind" {build}
+]
