@@ -1,6 +1,11 @@
 language: c
-sudo: false
-before_install:
-    - wget https://raw.github.com/ocaml/opam/master/shell/opam_installer.sh -O - | sh -s "${HOME}/bin"
-    - opam init --yes --comp '4.02.3'
-    - eval $(opam config env)
+sudo: required
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+env:
+  - OCAML_VERSION=4.00
+  - OCAML_VERSION=4.01
+  - OCAML_VERSION=4.02
+os:
+  - linux
+  - osx
