@@ -56,7 +56,6 @@ let rec term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t)
   let open Result.Monad_infix in
   fun context ->
   function
-  | Source.Term.Trace _ -> Result.Error (Codegen_error.Error ("Not implemented: Trace"))
   | Source.Term.Literal l -> literal context l
   | Source.Term.Variable name -> begin
       match Hashtbl.find context.named_values name with
@@ -67,11 +66,13 @@ let rec term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t)
     term context x >>= fun x' ->
     term context y >>= fun y' ->
     let llvm_ty = find_type_representation context t in
+    let o1 = { base_type = Float; value = x' } in
+    let o2 = { base_type = Float; value = y' } in
     begin
       match op with
-      | "+" -> Result.Ok (Llvm.build_fadd x' y' "addtmp" context.llbuilder)
-      | "-" -> Result.Ok (Llvm.build_fsub x' y' "subtmp" context.llbuilder)
-      | "*" -> Result.Ok (Llvm.build_fmul x' y' "multmp" context.llbuilder)
+      | "+" -> Result.Ok (cgbinop context Add o1 o2)
+      | "-" -> Result.Ok (cgbinop context Sub o1 o2)
+      | "*" -> Result.Ok (cgbinop context Mul o1 o2)
       | _ -> Result.Error (Codegen_error.Error "invalid binary operation")
     end
   | Source.Term.Call (callee, args) ->

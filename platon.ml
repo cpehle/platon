@@ -34,6 +34,7 @@ let codegen_top =
     ignore (Llvm.PassManager.initialize fpm);
     Llvm_analysis.assert_valid_module the_module;
     Llvm_analysis.assert_valid_function l;
+    printf "%s\n" (Ast.Term.string_of_func f);
     Llvm.dump_module the_module;
     Result.Ok ()
   end

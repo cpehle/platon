@@ -81,23 +81,21 @@ and application (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Res
   ident ps >>| (fun (id,p,p') -> id) >>| Term.var >>= fun var -> Result.return (Term.Application (fn, var))
 and plet (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
-  let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
   expect ps (Token.LET) >>= fun _ ->
   ident ps >>| (fun (id,p,p') -> id) >>= fun v ->
   expect ps (Token.EQUALS) >>= fun _ ->
   term ps >>= fun tm ->
   expect ps (Token.IN) >>= fun _ ->
   term ps >>= fun body ->
-  let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
+
   Result.return (Term.Let (v, tm, body))
 and pfun (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
-  let start_pos = ps.env_lexbuf.Lexbuf.pos_start in
+  (* let start_pos = ps.env_lexbuf.Lexbuf.pos_start in *)
   expect ps (Token.FUN) >>= fun _ ->
   ident ps >>|  (fun (id,p,p') -> id) >>= fun v ->
      expect ps (Token.DOT) >>= fun _ ->
      term ps >>= fun tm ->
-     let end_pos = ps.env_lexbuf.Lexbuf.pos_end in
      Result.return (Term.Lambda (v, tm))
 and term_list (ps:env) end_token tl =
   let open Result.Monad_infix in
