@@ -7,12 +7,24 @@ let parse_file filename =
   |> Pparser.from_lexbuf
   |> Pparser.term
 
+let f =
+  let module E = Ast.L1.Term in
+  let module T = Ast.L1.Type in
+  E.Function (E.Prototype ("square", [| "x" |]),
+                     E.Binary ("*", T.Base T.Double, E.Variable "x", E.Variable "x"))
+
+let g =
+  let module E = Ast.L1.Term in
+  let module T = Ast.L1.Type in
+  E.Function (E.Prototype ("double", [| "x" |]),
+                     E.Binary ("+", T.Base T.Double, E.Variable "x", E.Variable "x"))
+
+
 let codegen_top =
   let open Result.Monad_infix in
   fun () ->
-  let module Ast = Ast.L1 in
-  let f = Ast.Term.Function (Ast.Term.Prototype ("square", [| "x" |]),
-                        Ast.Term.Binary ("*", Ast.Type.Base Ast.Type.Double, Ast.Term.Variable "x", Ast.Term.Variable "x")) in
+
+
   let context = Llvm.global_context () in
   let the_module = Llvm.create_module context "platon" in
   let builder = Llvm.builder context in
@@ -34,7 +46,7 @@ let codegen_top =
     ignore (Llvm.PassManager.initialize fpm);
     Llvm_analysis.assert_valid_module the_module;
     Llvm_analysis.assert_valid_function l;
-    printf "%s\n" (Ast.Term.string_of_func f);
+    printf "%s\n" (Ast.L1.Term.string_of_func f);
     Llvm.dump_module the_module;
     Result.Ok ()
   end

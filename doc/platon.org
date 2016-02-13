@@ -1,13 +1,15 @@
 * Syntax
+
 ** Categories
 
 The syntax of platon is adapted to category theory. While it is not
-strictly nescessary to understand category theory for using platon, we
-nevertheless provide a short overview of the basic definitions in the
-following.
+strictly nescessary to understand category theory for using platon (it
+isn't usable anyways), we nevertheless provide a short overview of the
+basic definitions in the following.
 
-A category \(C\) is a class of objects \(Ob(C)\) and for every two objects \(x, y \in Ob(C)\) a set of arrows \(Arr_C(x,y)\).
-Arrows can be composed by a family of maps
+A category \(C\) is a class of objects \(Ob(C)\) and for every two
+objects \(x, y \in Ob(C)\) a set of arrows \(Arr_C(x,y)\).  Arrows can
+be composed by a family of maps
 
 $$
 ∘_{x y z}: Arr_C (x,y) × Arr_C (y,z) → Arr_C (x,z),
@@ -60,14 +62,19 @@ to denote the composition of Ff, Fg and Fh in D.
 
 Functors itself can also be composed, that is given functors
 F : C → D and G : D → E, their composition will be denoted by
-[F G]. The reason for this notation will become clear in a moment.
+
+[F G]
+
+ The reason for this notation will become clear in a moment.
 
 
-TODO Add better explanation of natural transformations
+Given two functors F : C → D and G : C → D, a natural transformation
 
-Given two functors F : C → D and G : C → D, 
-a natural transformation μ : F ⇒ G maps for every object x in C
-F(x) to G(x) and for every morphism f : x → y, the diagram
+μ : F ⇒ G 
+
+is an arrow \( μ_{x} : F(x) → G(x) \) for every object x ∈ C, such
+that for every arrow f : x → y, the following diagram commutes:
+
 
 F(x) → F(y)
  |      |  
@@ -75,14 +82,16 @@ F(x) → F(y)
  |      |
 G(x) → G(y)
 
-is supposed to commute.
-
 Functors and natural transformations form a category of their own,
 where functors are the objects and natural transformations are the
-arrows. So it makes sense to write (F μ η). However we have seen above
-that there is anoter way to compose functors themselves, which we
-denoted by [F G]. In fact it is also possible to compose natural
-transformations in a second way [η μ] and one has
+arrows. So using the notation introduced above, we can write
+
+(F μ η). 
+
+However as we have seen above, there is anoter way to compose
+functors themselves, which we denoted by [F G]. In fact it is also
+possible to compose natural transformations in a second way [η μ] and
+one has
 
 [(F η) (G μ)] = ([F G] [η μ])
 
@@ -93,7 +102,6 @@ transformations η : F ⇒ H and μ : G ⇒ I, we can also compose them in a
 second way [η μ], then
 
 Graphically the two forms of composition can be written as follows
-
 
 |      
 |       
@@ -112,16 +120,6 @@ Graphically the two forms of composition can be written as follows
 |     |
 
 
-(
- (f [F G](h j) g)
- lift 
- [_ η _]
- lower
-)
-
-
-
-
 inv: C → C 
 Δ: C → C ⊗ C
 m: C ⊗ C → C
@@ -129,7 +127,6 @@ m: C ⊗ C → C
 
 
 ** Examples
-
 *** k-Algebras
 
 [A · + k]
@@ -139,7 +136,6 @@ m: C ⊗ C → C
 *** Hopf Algebra
 
 {[H + · η Δ ε k] [_ ([H H] H) ([H H] H) (k H) (H [H H])]} 
-
 
 
 
@@ -174,7 +170,12 @@ join: T² → T
             |
 
 
+So lets assume for a moment, that we have values
 
+readInt :: IO Int
+writeInt :: Int → IO Int
+
+(readInt IO(square writeInt) join(_))
 
 
 
