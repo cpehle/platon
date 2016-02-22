@@ -1,5 +1,4 @@
 * Syntax
-
 ** Categories
 
 The syntax of platon is adapted to category theory. While it is not
@@ -39,7 +38,6 @@ Arr_C(c,d) their composition is written as
 This notation already incorporates the fact that
 composition is associative.
 
-
 ** Functors and natural transformations as examples of 2-categories
 
 Given two categories \(C\) und \(D\) a covariant functor \(F : C \to D\)
@@ -65,8 +63,9 @@ F : C → D and G : D → E, their composition will be denoted by
 
 [F G]
 
- The reason for this notation will become clear in a moment.
+The reason for this notation will become clear in a moment, functor composition is also associative, so it is possible to write
 
+[F G H](f g h)
 
 Given two functors F : C → D and G : C → D, a natural transformation
 
@@ -125,7 +124,6 @@ inv: C → C
 m: C ⊗ C → C
 ρ: A ⊗ C → C
 
-
 ** Examples
 *** k-Algebras
 
@@ -136,7 +134,6 @@ m: C ⊗ C → C
 *** Hopf Algebra
 
 {[H + · η Δ ε k] [_ ([H H] H) ([H H] H) (k H) (H [H H])]} 
-
 
 
 

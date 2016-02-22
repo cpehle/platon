@@ -14,6 +14,7 @@ let test_cases = [
     ("([+ x] y)", Result.Ok (comp [prod [Atom "+"; var "x"]; var "y"]));
     ("123.12", Result.Ok (Literal (Literal.Float 123.12)));
     ("123", Result.Ok (Literal (Literal.Int (Int64.of_int 123))));
+    ("F(f g h)", Result.Ok (var "x"));
     ("x : int = 12", Result.Ok (var "x"));
     ("x : vec _ int = 12 2 3 4 5 6", Result.Ok (var "x"))
   ]

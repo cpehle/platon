@@ -34,8 +34,10 @@ let mark_string s from until =
     for i = from to until do
       String.set mark i '~';
     done;
-  String.set mark from '^';
-  String.set mark until '^';
-  end else ();
+    end else ();
+  if (0 <= from) && (until < strlen) then begin
+      String.set mark from '^';
+      String.set mark until '^';
+    end else ();
   let mark =  color ~color:`Red mark in
   (String.concat ~sep:"\n" [s;mark]) ^ "\n"

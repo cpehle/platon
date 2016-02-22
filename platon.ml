@@ -28,12 +28,13 @@ let codegen_top =
   let context = Llvm.global_context () in
   let the_module = Llvm.create_module context "platon" in
   let builder = Llvm.builder context in
-  Codegen.codegen_function {
+  let cgcontext = {
       Codegen.llcontext = context;
       Codegen.llmodule = the_module;
       Codegen.llbuilder = builder;
-      Codegen.named_values = Hashtbl.create ~hashable:String.hashable ()} f
-  >>= fun l ->
+      Codegen.named_values = Hashtbl.create ~hashable:String.hashable ()} in
+  Codegen.codegen_function cgcontext f >>= fun l ->
+  Codegen.codegen_function cgcontext g >>= fun l' ->
   begin
     ignore (Llvm_executionengine.initialize ());
     let e = Llvm_executionengine.create the_module in
