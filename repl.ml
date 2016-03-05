@@ -13,7 +13,7 @@ let () =
       let ps = Pparser.from_string s in
       match Pparser.term ps with
       | Result.Ok tm ->
-         printf "%s\n" (Ast.L0.Term.to_string tm |> color_sprintf ~color:`Blue "%s");
+         printf "%s\n" (Plang.Term.to_string tm |> color_sprintf ~color:`Blue "%s");
          loop ()
       | Result.Error (err, l, l') ->
          print_string (Parse_error.mark_string s l.Position.columnoffset l'.Position.columnoffset);

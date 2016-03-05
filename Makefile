@@ -2,7 +2,7 @@ all: repl.native platon.native test.native
 byte: repl.byte platon.byte test.byte
 
 SOURCES:=pparser.ml plexer.ml platon.ml codegen.ml position.ml		\
-parse_error.ml codegen_error.ml ast.ml circuit.ml repl.ml token.ml	\
+parse_error.ml codegen_error.ml plang.ml llang.ml circuit.ml repl.ml token.ml	\
 unionfind.ml typeInference.ml test.ml
 TESTS:=test/*.ml
 

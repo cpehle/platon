@@ -1,8 +1,8 @@
- open Core.Std
+open Core.Std
 open OUnit2
 open Pparser
 
-open Ast.L0.Term
+open Plang.Term
 
 let test_cases = [
     ("let x = x in x", Result.Ok (let_ "x" (var "x") (var "x")));
@@ -14,9 +14,7 @@ let test_cases = [
     ("([+ x] y)", Result.Ok (comp [prod [Atom "+"; var "x"]; var "y"]));
     ("123.12", Result.Ok (Literal (Literal.Float 123.12)));
     ("123", Result.Ok (Literal (Literal.Int (Int64.of_int 123))));
-    ("F(f g h)", Result.Ok (var "x"));
-    ("x : int = 12", Result.Ok (var "x"));
-    ("x : vec _ int = 12 2 3 4 5 6", Result.Ok (var "x"))
+    ("(Δ [Δ Δ] [+ +] ·)", Result.Ok (comp [Atom "Δ"; prod [Atom "Δ"; Atom "Δ"]; prod [Atom "+"; Atom "+"]; Atom "·"]));
   ]
 
 let parse_all str =

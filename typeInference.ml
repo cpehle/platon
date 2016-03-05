@@ -1,4 +1,4 @@
-open Ast.L0
+open Plang
 
 type varname = string
 type env = (varname * Type.t) list

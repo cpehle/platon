@@ -1,6 +1,6 @@
 include Core.Std
 
-module Source = Ast.L1
+module Source = Llang
 
 type codegen_state = {
     llcontext : Llvm.llcontext;
@@ -33,11 +33,6 @@ let rec find_type_representation : codegen_state -> Source.Type.t -> Llvm.lltype
 let cgstruct context array =
     Llvm.struct_type context array
 
-let literal = fun context -> function
-    | Source.Term.Double d -> Result.Ok (Llvm.const_float (Llvm.double_type context.llcontext) d)
-    | Source.Term.Integer i -> Result.Ok (Llvm.const_int (Llvm.integer_type context.llcontext 32) i)
-
-let select context res = ()
 
 type operator = Add | Mul | Sub
 type base_type = Float | Int
@@ -46,17 +41,48 @@ type operand = {
     value : Llvm.llvalue;
   }
 
-let cgbinop context op o o' = let builder, tmp = match op with
+let literal = fun context -> function
+    | Source.Term.Double d -> {base_type = Float; value = Llvm.const_float (Llvm.double_type context.llcontext) d}
+    | Source.Term.Integer i -> {base_type = Int; value = Llvm.const_int (Llvm.integer_type context.llcontext 32) i}
+
+let select context res = ()
+
+let cgbinop (context:codegen_state) (op:operator) (o:operand) (o':operand) : operand = let builder, tmp = match op with
   | Add -> if o.base_type = Float then Llvm.build_fadd, "faddtmp" else  Llvm.build_add, "addtmp"
   | Mul -> if o.base_type = Float then Llvm.build_fmul, "fmultmp" else  Llvm.build_fadd, "multmp"
   | Sub -> if o.base_type = Float then Llvm.build_fsub, "fmultmp" else  Llvm.build_fsub, "subtmp"
- in builder o.value o'.value tmp context.llbuilder
+ in { base_type = o.base_type; value = builder o.value o'.value tmp context.llbuilder }
 
-let rec term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
+
+
+let cgbinoplist (context:codegen_state) (ops:operator List.t) (operands : operand List.t) : operand List.t =
+  let open List in
+  let rec go ops operands acc =
+    match ops with
+    | [] -> acc
+    | o::operators -> match operands with
+                      | o1::o2::operands -> go operators operands (cgbinop context o o1 o2::acc)
+                      | _ -> assert false
+  in go ops operands []
+
+
+let test_cgbinoplist c op =
+  let open Source.Term in
+  let ops = [Add; Add] in
+  let operands = [literal c (Double 1.0); literal c (Double 0.3); literal c (Double 0.4); op] in
+  let r = cgbinoplist c ops operands in
+  cgbinoplist c [Add] r
+
+
+
+
+
+
+let rec term : codegen_state -> Source.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
   let open Result.Monad_infix in
   fun context ->
   function
-  | Source.Term.Literal l -> literal context l
+  | Source.Term.Literal l -> Result.Ok (literal context l).value
   | Source.Term.Variable name -> begin
       match Hashtbl.find context.named_values name with
       | Some r -> Result.Ok r
@@ -70,9 +96,9 @@ let rec term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t)
     let o2 = { base_type = Float; value = y' } in
     begin
       match op with
-      | "+" -> Result.Ok (cgbinop context Add o1 o2)
-      | "-" -> Result.Ok (cgbinop context Sub o1 o2)
-      | "*" -> Result.Ok (cgbinop context Mul o1 o2)
+      | "+" -> Result.Ok (cgbinop context Add o1 (List.hd_exn (test_cgbinoplist context o2))).value
+      | "-" -> Result.Ok (cgbinop context Sub o1 o2).value
+      | "*" -> Result.Ok (cgbinop context Mul o1 o2).value
       | _ -> Result.Error (Codegen_error.Error "invalid binary operation")
     end
   | Source.Term.Call (callee, args) ->
@@ -90,7 +116,7 @@ let rec term : codegen_state -> Ast.L1.Term.t -> (Llvm.llvalue, Codegen_error.t)
       Result.Ok (Llvm.build_call callee args "calltmp" context.llbuilder)
 
 
-let codegen_proto : codegen_state -> Ast.L1.Term.proto -> (Llvm.llvalue, Codegen_error.t) Result.t =
+let codegen_proto : codegen_state -> Source.Term.proto -> (Llvm.llvalue, Codegen_error.t) Result.t =
   let open Result.Monad_infix in
   fun context -> function
   | Source.Term.Prototype (name,args) ->

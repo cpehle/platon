@@ -1,9 +1,9 @@
 open OUnit2
-open Ast.L0.Term
-open Ast.L0.Type
+open Plang.Term
+open Plang.Type
 
 
-let top_type_check : Ast.L0.Term.t -> Ast.L0.Type.t = fun exp ->
+let top_type_check : Plang.Term.t -> Plang.Type.t = fun exp ->
   let initial_state = { TypeInference.gensym_counter = 0;
                         TypeInference.current_level = 0;
                         TypeInference.to_be_level_adjusted = []} in

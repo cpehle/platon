@@ -1,5 +1,5 @@
 open Core.Std
-open Ast.L0
+open Plang
 
 type filename = string
 type error_msg = string

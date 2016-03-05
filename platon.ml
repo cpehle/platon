@@ -8,14 +8,14 @@ let parse_file filename =
   |> Pparser.term
 
 let f =
-  let module E = Ast.L1.Term in
-  let module T = Ast.L1.Type in
+  let module E = Llang.Term in
+  let module T = Llang.Type in
   E.Function (E.Prototype ("square", [| "x" |]),
                      E.Binary ("*", T.Base T.Double, E.Variable "x", E.Variable "x"))
 
 let g =
-  let module E = Ast.L1.Term in
-  let module T = Ast.L1.Type in
+  let module E = Llang.Term in
+  let module T = Llang.Type in
   E.Function (E.Prototype ("double", [| "x" |]),
                      E.Binary ("+", T.Base T.Double, E.Variable "x", E.Variable "x"))
 
@@ -36,10 +36,7 @@ let codegen_top =
   Codegen.codegen_function cgcontext f >>= fun l ->
   Codegen.codegen_function cgcontext g >>= fun l' ->
   begin
-    ignore (Llvm_executionengine.initialize ());
-    let e = Llvm_executionengine.create the_module in
     let fpm = Llvm.PassManager.create_function the_module in
-    Llvm_target.DataLayout.add_to_pass_manager fpm (Llvm_executionengine.data_layout e);
     Llvm_scalar_opts.add_instruction_combination fpm;
     Llvm_scalar_opts.add_reassociation fpm;
     Llvm_scalar_opts.add_gvn fpm;
@@ -47,7 +44,7 @@ let codegen_top =
     ignore (Llvm.PassManager.initialize fpm);
     Llvm_analysis.assert_valid_module the_module;
     Llvm_analysis.assert_valid_function l;
-    printf "%s\n" (Ast.L1.Term.string_of_func f);
+    printf "%s\n" (Llang.Term.string_of_func f);
     Llvm.dump_module the_module;
     Result.Ok ()
   end
