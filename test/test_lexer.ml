@@ -13,8 +13,9 @@ let test_cases =
     ("~", ok [ATOM "~"]);
     ("12.1", ok [FLOAT 12.1]);
     ("[12.1 12 23.23 1.233]", ok [LBRACKET; FLOAT 12.1; INT (Int.to_int64 12); FLOAT 23.23; FLOAT 1.233; RBRACKET]);
-    ("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
 
+("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
+    ("Δ", ok [IDENT "Δ"]);
     ("forall", Result.Ok [FORALL]);
     ("module", Result.Ok [MODULE]);
     ("→", Result.Ok [RIGHTARROW]);

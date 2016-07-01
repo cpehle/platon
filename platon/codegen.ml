@@ -73,11 +73,6 @@ let test_cgbinoplist c op =
   let r = cgbinoplist c ops operands in
   cgbinoplist c [Add] r
 
-
-
-
-
-
 let rec term : codegen_state -> Source.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
   let open Result.Monad_infix in
   fun context ->

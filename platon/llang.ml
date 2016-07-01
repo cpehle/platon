@@ -23,6 +23,7 @@ module Term = struct
     type proto = Prototype of string * string array
     type func = Function of proto * t
 
+
     let rec to_string : t -> string = function
       | Variable v -> v
       | Binary (op,ty,e1,e2) -> "(" ^ to_string e1 ^ op ^ to_string e2 ^ ")"

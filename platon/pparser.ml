@@ -48,9 +48,11 @@ let ident (ps:env) : (string * Position.t * Position.t, Parse_error.t * Position
                           Result.return (id, ps.env_lexbuf.Lexbuf.pos_start, ps.env_lexbuf.Lexbuf.pos_end)
       | _ as token -> fail ps (Parse_error.UnexpectedTokenWithExpectation (Token.to_string token, "identifier"))
 
+
 let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   peek ps >>= function
+
   | Token.IDENT id ->
      ident ps >>= fun (id,p,p') ->
      Result.return  (Term.Variable id)

@@ -1,4 +1,5 @@
-S test
-B _build
+S test/
+S platon/
+B _build/
 B _build/test/
 PKG llvm oUnit llvm.scalar_opts llvm.executionengine core core_extended tsdl cmdliner vg gg vg.cairo sedlex.ppx sedlex
