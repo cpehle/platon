@@ -2,7 +2,6 @@ open OUnit2
 open Plang.Term
 open Plang.Type
 
-
 let top_type_check : Plang.Term.t -> Plang.Type.t = fun exp ->
   let initial_state = { TypeInference.gensym_counter = 0;
                         TypeInference.current_level = 0;

@@ -1,26 +1,26 @@
 open Core.Std
-open Core_extended.Color_print
-open Core_extended.Readline
+
+let rec input_line prompt cb =
+  match (LNoise.linenoise prompt) with
+  | None -> ()
+  | Some v ->
+    cb v;
+    input_line prompt cb
 
 let () =
   let open Result.Monad_infix in
-  let rec loop = fun () ->
-    let prompt = color_sprintf ~color:`Red "> " in
-    let res = input_line ~prompt () in
-   match res with
-   | None -> ()
-   | Some s ->
+  let prompt = "> " in
+  let loop = input_line prompt (fun s ->
       let ps = Pparser.from_string s in
       match Pparser.term ps with
       | Result.Ok tm ->
-         printf "%s\n" (Plang.Term.to_string tm |> color_sprintf ~color:`Blue "%s");
-         loop ()
+         (Plang.Term.to_string tm) |> Printf.sprintf "%s"  |> print_endline
       | Result.Error (err, l, l') ->
-         print_string (Parse_error.mark_string s l.Position.columnoffset l'.Position.columnoffset);
-         let error = sprintf "%s -- %s : %s\n" (Position.to_string l) (Position.to_string l') (Parse_error.to_string err)
+         print_endline (Parse_error.mark_string s l.Position.columnoffset l'.Position.columnoffset);
+         let error = sprintf "%s -- %s : %s" (Position.to_string l) (Position.to_string l') (Parse_error.to_string err)
          in
-         print_string error;
-         loop ()
+         print_endline error;
+                    )
   in
   let spec =
   let open Command.Spec in
@@ -31,5 +31,5 @@ let () =
     ~summary:"Read eval print loop"
     ~readme:(fun () -> "This is the read eval print loop of platon")
     spec
-    (fun () -> loop ()) in
+    (fun () -> loop) in
   Command.run command

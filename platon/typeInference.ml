@@ -13,7 +13,7 @@ type type_inference_state = {
   mutable current_level  : int;
   mutable to_be_level_adjusted : Type.t list; }
 
- let reset_gensym (s : type_inference_state) = s.gensym_counter <- 0
+let reset_gensym (s : type_inference_state) = s.gensym_counter <- 0
 let reset_level (s : type_inference_state) = s.current_level <- 1
 let reset_level_adjustment s = s.to_be_level_adjusted <- []
 let reset_type_inference_state s = reset_level s; reset_gensym s
@@ -167,6 +167,9 @@ let rec typeof : type_inference_state -> env -> Term.t -> Type.t =
       let ty_res = new_var s in
       unify s ty_fun (new_arrow s ty_arg ty_res);
       ty_res
+    | Term.Prod l ->
+       let typs = List.map (typeof s env) l in
+       Type.Prod typs
     | Term.Let (x,e,e2) ->
       enter_level s;
       let ty_e = typeof s env e in

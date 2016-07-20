@@ -1,12 +1,13 @@
 opam-version: "1.2"
 name: "platon"
-version: "0.1"
-maintainer: "christian.pehle@kip.uni-heidelberg.de"
-authors: "Christian Pehle"
+version: "0.0.1"
+maintainer: "Christian Pehle <christian.pehle@kip.uni-heidelberg.de>"
+authors: [ "Christian Pehle <christian.pehle@kip.uni-heidelberg.de>"]
+license: "BSD"
 homepage: "https://github.com/cpehle/platon"
 bug-reports: "https://github.com/cpehle/platon/issues"
 dev-repo: "https://github.com/cpehle/platon.git"
-build: [make]
+build: ["make"]
 build-test: [make "test"]
 depends: [
   "llvm"
@@ -16,3 +17,4 @@ depends: [
   "ounit" {test}
   "ocamlfind" {build}
 ]
+available: [ocaml-version = "4.02.3"]

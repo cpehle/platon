@@ -73,6 +73,7 @@ module Type = struct
   type t =
     | TVar of tv ref
     | QVar of qname
+    | Prod of t List.t
     | TArrow of t * t * levels
    and tv = Unbound of string * level | Link of t
    and levels = { mutable level_old : level; mutable level_new : level } [@@deriving sexp]
@@ -82,6 +83,7 @@ module Type = struct
   let rec to_string : t -> string = function
     | TVar v -> assert false
     | QVar v -> v
+    | Prod l -> "[" ^ String.concat ~sep:" " (List.map ~f:to_string l) ^ "]"
     | TArrow (t,t',l) -> (to_string t) ^ "->" ^ (to_string t')
 end
 

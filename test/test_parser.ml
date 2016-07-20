@@ -14,7 +14,7 @@ let test_cases = [
     ("([+ x] y)", Result.Ok (comp [prod [Atom "+"; var "x"]; var "y"]));
     ("123.12", Result.Ok (Literal (Literal.Float 123.12)));
     ("123", Result.Ok (Literal (Literal.Int (Int64.of_int 123))));
-    ("(Δ [Δ Δ] [+ +])", Result.Ok (comp [Variable "Δ"; prod [Variable "Δ"; Variable "Δ"]; prod [Atom "+"; Atom "+"]]));
+    ("(Δ [Δ  Δ] [+ +])", Result.Ok (comp [Variable "Δ"; prod [Variable "Δ"; Variable "Δ"]; prod [Atom "+"; Atom "+"]]));
   ]
 
 let parse_all str =
