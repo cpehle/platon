@@ -14,6 +14,7 @@ depends: [
   "sedlex"
   "core"
   "core_extended"
+  "ctypes-foreign"
   "ounit" {test}
   "ocamlfind" {build}
 ]
