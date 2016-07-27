@@ -12,6 +12,7 @@ build-test: [make "test"]
 depends: [
   "llvm"
   "sedlex"
+  "linenoise"
   "core"
   "core_extended"
   "ctypes-foreign"
