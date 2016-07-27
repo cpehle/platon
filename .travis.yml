@@ -7,6 +7,7 @@ before_install:
   - opam switch 4.02.3
   - eval `opam config env`
   - opam update
+  - brew install libffi
 before_script:
   - opam pin add -y platon .
 script: 
