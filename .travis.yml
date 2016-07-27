@@ -8,6 +8,7 @@ before_install:
   - eval `opam config env`
   - opam update
   - brew install libffi
+  - bres install llvm --with-clang
 before_script:
   - opam pin add -y platon .
 script: 
