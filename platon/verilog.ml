@@ -42,3 +42,5 @@ let parameters = { Easy_format.list with
 
 let pp_module m =
   print_string (Easy_format.Pretty.to_string (format_module m) ^ "\n")
+
+let _ = pp_module ()
