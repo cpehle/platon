@@ -1,5 +1,5 @@
-all: repl.native platon.native test.native verilog.native
-byte: repl.byte platon.byte test.byte verilog.byte
+all: repl.native platon.native test.native
+byte: repl.byte platon.byte test.byte
 
 SOURCES:=platon/*.ml
 TESTS:=test/*.ml
