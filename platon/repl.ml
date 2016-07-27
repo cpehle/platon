@@ -10,7 +10,14 @@ let rec input_line prompt cb =
 let () =
   let open Result.Monad_infix in
   let prompt = "> " in
-  let loop = input_line prompt (fun s ->
+  let loop = fun () ->
+     LNoise.history_set ~max_length:100 |> ignore;
+     LNoise.set_completion_callback begin fun line_so_far ln_completions ->
+                                          if line_so_far <> "" && line_so_far.[0] = 'l' then
+                                            ["let"]
+                                            |> List.iter ~f:(LNoise.add_completion ln_completions);
+                                    end;
+    input_line prompt (fun s ->
       let ps = Pparser.from_string s in
       match Pparser.term ps with
       | Result.Ok tm ->
@@ -31,5 +38,5 @@ let () =
     ~summary:"Read eval print loop"
     ~readme:(fun () -> "This is the read eval print loop of platon")
     spec
-    (fun () -> loop) in
+    loop in
   Command.run command

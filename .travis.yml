@@ -1,12 +1,16 @@
-language: c
-sudo: required
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
-script: bash -ex .travis-opam.sh
-
-env:
-  - OCAML_VERSION=4.00
-  - OCAML_VERSION=4.01
-  - OCAML_VERSION=4.02
-os:
-  - linux
-  - osx
+language: objective-c
+osx_image: xcode7.3
+before_install:
+  - brew update
+  - brew install opam
+  - opam init
+  - opam switch 4.02.3
+  - eval `opam config env`
+  - opam update
+install:
+  - opam pin add -y reason 'https://github.com/facebook/reason.git'
+before_script:
+  - opam pin add -y platon .
+script: 
+  - make test
+  - git diff --exit-code

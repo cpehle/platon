@@ -9,8 +9,6 @@ type codegen_state = {
     named_values : (string, Llvm.llvalue) Hashtbl.t;
   }
 
-let (>>) f g x = g (f x)
-let (|>) x f   = f x
 
 type 'a func = { func : Llvm.llvalue; context : codegen_state }
 
@@ -35,22 +33,21 @@ let cgstruct context array =
 
 
 type operator = Add | Mul | Sub
-type base_type = Float | Int
 type operand = {
-    base_type : base_type;
+    base_type : Source.Type.base;
     value : Llvm.llvalue;
   }
 
 let literal = fun context -> function
-    | Source.Term.Double d -> {base_type = Float; value = Llvm.const_float (Llvm.double_type context.llcontext) d}
-    | Source.Term.Integer i -> {base_type = Int; value = Llvm.const_int (Llvm.integer_type context.llcontext 32) i}
+    | Source.Term.Double d -> {base_type = Source.Type.Double; value = Llvm.const_float (Llvm.double_type context.llcontext) d}
+    | Source.Term.Integer i -> {base_type = Source.Type.Integer; value = Llvm.const_int (Llvm.integer_type context.llcontext 32) i}
 
 let select context res = ()
 
 let cgbinop (context:codegen_state) (op:operator) (o:operand) (o':operand) : operand = let builder, tmp = match op with
-  | Add -> if o.base_type = Float then Llvm.build_fadd, "faddtmp" else  Llvm.build_add, "addtmp"
-  | Mul -> if o.base_type = Float then Llvm.build_fmul, "fmultmp" else  Llvm.build_fadd, "multmp"
-  | Sub -> if o.base_type = Float then Llvm.build_fsub, "fmultmp" else  Llvm.build_fsub, "subtmp"
+  | Add -> if o.base_type = Source.Type.Double then Llvm.build_fadd, "faddtmp" else  Llvm.build_add, "addtmp"
+  | Mul -> if o.base_type = Source.Type.Double then Llvm.build_fmul, "fmultmp" else  Llvm.build_fadd, "multmp"
+  | Sub -> if o.base_type = Source.Type.Double then Llvm.build_fsub, "fmultmp" else  Llvm.build_fsub, "subtmp"
  in { base_type = o.base_type; value = builder o.value o'.value tmp context.llbuilder }
 
 
@@ -73,7 +70,13 @@ let test_cgbinoplist c op =
   let r = cgbinoplist c ops operands in
   cgbinoplist c [Add] r
 
+
+
 let rec term : codegen_state -> Source.Term.t -> (Llvm.llvalue, Codegen_error.t) Result.t =
+  let base_type = function
+    | Source.Type.Base t -> Result.Ok t
+    | _ -> Result.Error (Codegen_error.Error ("Base type required but got..."))
+  in
   let open Result.Monad_infix in
   fun context ->
   function
@@ -86,12 +89,12 @@ let rec term : codegen_state -> Source.Term.t -> (Llvm.llvalue, Codegen_error.t)
   | Source.Term.Binary (op,t,x,y) ->
     term context x >>= fun x' ->
     term context y >>= fun y' ->
-    let llvm_ty = find_type_representation context t in
-    let o1 = { base_type = Float; value = x' } in
-    let o2 = { base_type = Float; value = y' } in
+    base_type t >>= fun t ->
+    let o1 = { base_type = t; value = x' } in
+    let o2 = { base_type = t; value = y' } in
     begin
       match op with
-      | "+" -> Result.Ok (cgbinop context Add o1 (List.hd_exn (test_cgbinoplist context o2))).value
+      | "+" -> Result.Ok (cgbinop context Add o1 o2).value
       | "-" -> Result.Ok (cgbinop context Sub o1 o2).value
       | "*" -> Result.Ok (cgbinop context Mul o1 o2).value
       | _ -> Result.Error (Codegen_error.Error "invalid binary operation")
