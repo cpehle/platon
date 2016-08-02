@@ -29,13 +29,13 @@ type ('a, 'b) expr_form =
 and ('a, 'b) elt_form =
   | Bit of int * int
 
-let atom = { atom_style = Some "atom" }
-let label = { label with label_style = Some "label" }
-let begin_style = ({ label with ident_after_label = 0 },
-                   ("begin", ";", "end", {list with stick_to_label = false}))
+(* let atom = { atom_style = Some "atom" } *)
+(* let label = { label with label_style = Some "label" } *)
+(* let begin_style = ({ label with ident_after_label = 0 }, *)
+(*                    ("begin", ";", "end", {list with stick_to_label = false})) *)
 
-let format_module_definition (body_label, body_param) name param body =
-  Easy_format.Label ((Easy_format.Label (()), body_label), Easy_format.List (body_param, List.map (fun s -> Easy_format.Atom (s, atom)) body))
+(* let format_module_definition (body_label, body_param) name param body = *)
+(*   Easy_format.Label ((Easy_format.Label (()), body_label), Easy_format.List (body_param, List.map (fun s -> Easy_format.Atom (s, atom)) body)) *)
 
 let parameters = { Easy_format.list with
                    Easy_format.opening_style = Some "punct";
