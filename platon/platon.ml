@@ -26,6 +26,8 @@ let g =
 let codegen_top =
   let open Result.Monad_infix in
   fun () ->
+
+
   let context = Llvm.global_context () in
   let the_module = Llvm.create_module context "platon" in
   let builder = Llvm.builder context in
