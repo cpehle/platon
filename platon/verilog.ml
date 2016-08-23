@@ -10,7 +10,7 @@ type typ =
 type ('a, 'b) declaration_form =
   | Register of string * typ
   | Wire of string * typ
-and ('a,'b) module_form = {
+ and ('a,'b) module_form = {
   name : string;
   input : (var * typ) list;
   output : (var * typ) list;
