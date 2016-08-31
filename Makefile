@@ -1,4 +1,4 @@
-all: repl.native platon.native test.native
+all: repl.native platon.native test.native verilog.native
 byte: repl.byte platon.byte test.byte
 
 SOURCES:=platon/*.ml
@@ -16,8 +16,8 @@ repl.native: $(SOURCES)
 platon.native: $(SOURCES)
 	@ocamlbuild -I test/ -I platon/ -j 4 -use-ocamlfind -tag thread -package core,core_extended,sexplib,sedlex,sedlex.ppx,llvm,llvm.analysis,llvm.executionengine,llvm.scalar_opts,llvm.target platon.native
 
-verilog.native: platon/verilog.ml
-	@ocamlbuild -I platon -j 4 -use-ocamlfind -tag thread -package core,easy-format verilog.native
+verilog.native: verilog/verilog.ml
+	@ocamlbuild -I verilog -j 4 -use-ocamlfind -tag thread -package core,core_extended,easy-format,sedlex,sedlex.ppx verilog.native
 
 clean:
 	@ocamlbuild -clean
