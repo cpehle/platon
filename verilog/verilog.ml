@@ -364,6 +364,30 @@ let lex_all code =
   in f [] |> List.rev
 
 
+module L = struct
+  let module_ = "module"
+  let always_comb = "always_comb"
+  let always_ff = "always_ff"
+  let lparen = "("
+  let rparen = ")"
+  let dot = "."
+  let comma = ","
+  let colon = ":"
+  let question = "?"
+  let semi = ";"
+  let else_ = "else"
+  let if_ = "if"
+  let while_ = "while"
+  let case = "case"
+  let endcase = "endcase"
+  let eq = "="
+  let ca = "<="
+end
+module P = Ext_pp
+
+let semi f = P.string f L.semi
+
+
 
 let _ =
   let ex = "module test(input logic[31:0] a, output logic[31:0] b);\
