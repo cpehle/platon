@@ -17,7 +17,7 @@ platon.native: $(SOURCES)
 	@ocamlbuild -I test/ -I platon/ -j 4 -use-ocamlfind -tag thread -package core,core_extended,sexplib,sedlex,sedlex.ppx,llvm,llvm.analysis,llvm.executionengine,llvm.scalar_opts,llvm.target platon.native
 
 verilog.native: verilog/verilog.ml
-	@ocamlbuild -I verilog -j 4 -use-ocamlfind -tag thread -package core,core_extended,easy-format,sedlex,sedlex.ppx verilog.native
+	@ocamlbuild -I verilog -j 4 -use-ocamlfind -tag thread -package core,core_extended,sedlex,sedlex.ppx verilog.native
 
 clean:
 	@ocamlbuild -clean

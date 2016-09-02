@@ -256,8 +256,8 @@ module Parser = struct
   let parse_port ps = []
 
 
-  let expect ps tok = match (peek ps) with
-    | tok -> bump ps;
+  let expect ps t = match (peek ps) with
+    | t' when t' = t -> bump ps;
     | _ -> (token_error ps (Parse_error.UnexpectedToken "unexpected token"); bump ps;)
 
   let ident ps = match (peek ps) with
@@ -304,7 +304,7 @@ module Parser = struct
     | Token.MODULE -> parse_module ps
     (* | Token.PACKAGE -> parse_package ps *)
     (* | Token.INTERFACE -> parse_interface ps *)
-    | _ -> token_error ps;
+
 
 
 
