@@ -363,31 +363,48 @@ let lex_all code =
     | tok -> f (tok :: acc)
   in f [] |> List.rev
 
+module PP = struct
+  module L = struct
+    let module_ = "module"
+    let always_comb = "always_comb"
+    let always_ff = "always_ff"
+    let lparen = "("
+    let rparen = ")"
+    let dot = "."
+    let comma = ","
+    let colon = ":"
+    let question = "?"
+    let semi = ";"
+    let else_ = "else"
+    let if_ = "if"
+    let while_ = "while"
+    let case = "case"
+    let endcase = "endcase"
+    let eq = "="
+    let ca = "<="
+  end
+  module P = Ext_pp
+  let semi f = P.string f L.semi
 
-module L = struct
-  let module_ = "module"
-  let always_comb = "always_comb"
-  let always_ff = "always_ff"
-  let lparen = "("
-  let rparen = ")"
-  let dot = "."
-  let comma = ","
-  let colon = ":"
-  let question = "?"
-  let semi = ";"
-  let else_ = "else"
-  let if_ = "if"
-  let while_ = "while"
-  let case = "case"
-  let endcase = "endcase"
-  let eq = "="
-  let ca = "<="
+  let expression_desc = ()
+  (* let statement_desc = function *)
+  (*   | Case (a,b) -> *)
+  (*      P.string "asd" L.case; *)
+  (*      P.space f; *)
+  (*      let cxt = P.paren_group f 1 @@ fun _ ->  expression 0 cxt f e in *)
+  (*      P.space f; *)
+  (*      P.brace_vgroup f 1 @@ fun _ -> *)
+  (*     let cxt = loop cxt f (fun f i -> P.string f (string_of_int i) ) cc in *)
+  (*     (match def with *)
+  (*      | None -> cxt *)
+  (*      | Some def -> *)
+  (*        P.group f 1 @@ fun _ -> *)
+  (*          P.string f L.default; *)
+  (*          P.string f L.colon; *)
+  (*          P.newline f; *)
+  (*          statement_list  false cxt  f def *)
+  (*     ) *)
 end
-module P = Ext_pp
-
-let semi f = P.string f L.semi
-
-
 
 let _ =
   let ex = "module test(input logic[31:0] a, output logic[31:0] b);\
