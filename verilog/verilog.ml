@@ -363,9 +363,12 @@ let lex_all code =
     | tok -> f (tok :: acc)
   in f [] |> List.rev
 
+
 module PP = struct
   module L = struct
     let module_ = "module"
+    let always = "always"
+    let at = "@"
     let always_comb = "always_comb"
     let always_ff = "always_ff"
     let lparen = "("
@@ -385,6 +388,7 @@ module PP = struct
   end
   module P = Ext_pp
   let semi f = P.string f L.semi
+
 
   let expression_desc = ()
   (* let statement_desc = function *)
