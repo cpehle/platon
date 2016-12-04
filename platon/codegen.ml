@@ -136,13 +136,6 @@ let codegen_proto : codegen_state -> Source.Term.proto -> (Llvm.llvalue, Codegen
                      (Llvm.params f);
                    Result.Ok f
 
-(* let nvvm_read_ptx_sreg_tid_x = Llvm.declare_function "llvm.nvvm.read.ptx.sreg.tid.x" (Llvm.function_type (Llvm.i32_type context.llcontext) [||]) in *)
-(*       let nvvm_read_ptx_sreg_tid_y = Llvm.declare_function "llvm.nvvm.read.ptx.sreg.tid.y" (Llvm.function_type (Llvm.i32_type context.llcontext) [||]) in *)
-(*       let nvvm_read_ptx_sreg_tid_z = Llvm.declare_function "llvm.nvvm.read.ptx.sreg.tid.z" (Llvm.function_type (Llvm.i32_type context.llcontext) [||]) in *)
-(*       let nvvm_read_ptx_sreg_ntid_x = Llvm.declare_function "llvm.nvvm.read.ptx.sreg.ntid.x" (Llvm.function_type (Llvm.i32_type context.llcontext) [||]) in *)
-(*       let nvvm_read_ptx_sreg_ntid_y = Llvm.declare_function "llvm.nvvm.read.ptx.sreg.ntid.y" (Llvm.function_type (Llvm.i32_type context.llcontext) [||]) in *)
-(*       let nvvm_read_ptx_sreg_ntid_z = Llvm.declare_function "llvm.nvvm.read.ptx.sreg.ntid.z" (Llvm.function_type (Llvm.i32_type context.llcontext) [||]) in *)
-
 
 let codegen_function context =
   let open Result.Monad_infix in function

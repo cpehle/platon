@@ -167,6 +167,14 @@ let rec typeof : type_inference_state -> env -> Term.t -> Type.t =
       let ty_res = new_var s in
       unify s ty_fun (new_arrow s ty_arg ty_res);
       ty_res
+    | Term.Comp ts ->
+       failwith "Not implemented"
+    | Term.Rel ts ->
+       failwith "Not implemented"
+    | Term.Atom ts ->
+       failwith "Not implemented"
+    | Term.Literal l ->
+       failwith "Not implemented"
     | Term.Prod l ->
        let typs = List.map (typeof s env) l in
        Type.Prod typs

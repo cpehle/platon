@@ -18,14 +18,14 @@ module Term = struct
 
   type t =
     | Variable of varname (** variable "x" *)
-    | Atom of varname
+    | Atom of varname (** Atom[..]..[..] *)
     | Literal of Literal.t  (** literal "3.14" or "234235" *)
     | Prod of t list (** [e_0 e_1 ... e_n] *)
     | Comp of t list (** (e_0 e_1 ... e_n) *)
     | Rel of t list  (** {e_0 e_1 ... e_n} *)
-    | Application of t * t
-    | Lambda of varname * t
-    | Let of varname * t * t
+    | Application of t * t (** f x *)
+    | Lambda of varname * t (** fun x . x *)
+    | Let of varname * t * t (** let x = e0 in e1 *)
     [@@deriving sexp]
 
   let rec to_string = function
@@ -70,7 +70,13 @@ module Type = struct
   let generic_level =  100000000
   let marked_level = -1
 
+  type const =
+    | Float
+    | String
+    | Int
+
   type t =
+    | TConst of const
     | TVar of tv ref
     | QVar of qname
     | Prod of t List.t
@@ -85,6 +91,10 @@ module Type = struct
     | QVar v -> v
     | Prod l -> "[" ^ String.concat ~sep:" " (List.map ~f:to_string l) ^ "]"
     | TArrow (t,t',l) -> (to_string t) ^ "->" ^ (to_string t')
+    | TConst c -> match c with
+                  | Float -> "float"
+                  | String -> "string"
+                  | Int -> "int"
 end
 
 module Module = struct

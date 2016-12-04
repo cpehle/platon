@@ -5,9 +5,11 @@ module Type = struct
     type base =
       | Double
       | Integer
+      [@@deriving sexp]
     type t =
       | Base of base
       | Arrow of t * t
+      [@deriving sexp]
 
     let rec to_string : t -> string = function
       | Base b -> (match b with
@@ -17,18 +19,21 @@ module Type = struct
 end
 
 module Term = struct
-    type varname = string
+    type varname = string [@@deriving sexp]
     type literal =
       | Double of float
       | Integer of int
+      [@@deriving sexp]
     type t =
       | Literal of literal
       | Variable of varname
       | Let of t * Type.t * t * t
       | Binary of string * Type.t * t * t
       | Call of string * t array
-    type proto = Prototype of string * string array
-    type func = Function of proto * t
+      [@@deriving sexp]
+
+    type proto = Prototype of string * string array [@@deriving sexp]
+    type func = Function of proto * t [@@deriving sexp]
 
 
     let rec to_string : t -> string = function

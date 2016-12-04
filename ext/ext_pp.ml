@@ -118,7 +118,19 @@ let bracket fmt u =
   string fmt "[";
   let v = u () in
   string fmt "]";
-  v 
+  v
+
+let begin_end_vgroup st n action =
+  string st "begin";
+  let v = vgroup st n (fun _ ->
+    newline st;
+    let v =  action () in
+    v
+              ) in
+  force_newline st;
+  string st "end";
+  v
+
 
 let brace_vgroup st n action = 
   string st "{";

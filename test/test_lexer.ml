@@ -13,13 +13,13 @@ let test_cases =
     ("~", ok [ATOM "~"]);
     ("12.1", ok [FLOAT 12.1]);
     ("[12.1 12 23.23 1.233]", ok [LBRACKET; FLOAT 12.1; INT (Int.to_int64 12); FLOAT 23.23; FLOAT 1.233; RBRACKET]);
-
-("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
+    ("שדגשדג", Result.Ok [IDENT "שדגשדג"]);
     ("Δ", ok [IDENT "Δ"]);
     ("forall", Result.Ok [FORALL]);
     ("module", Result.Ok [MODULE]);
     ("→", Result.Ok [RIGHTARROW]);
-    (* ("())in,let_ Ma ->==", Result.Ok [LPAREN; RPAREN; RPAREN; IN; COMMA; IDENT "let_"; IDENT "Ma"; RIGHTARROW; EQUALS; EQUALS]); *)
+    ("0b100", Result.Ok [INT (Int64.of_int 4)]);
+    ("0x16", Result.Ok [INT (Int64.of_int (16+6))]);
     ("12312313 12.32 \"string\"", Result.Ok [INT (Int64.of_int 12312313); FLOAT 12.32; STRING "string"])
   ]
 
