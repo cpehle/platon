@@ -1,4 +1,4 @@
-# Platon
+# Platon [![Build Status](https://travis-ci.org/cpehle/platon.svg?branch=master)](https://travis-ci.org/cpehle/platon)
 
 Platon aims to be a general purpose extensible programming language
 with support for unconventional programming models. The default
