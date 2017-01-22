@@ -17,6 +17,7 @@ depends: [
   "core_extended"
   "ctypes-foreign"
   "ounit"
+  "cmdliner"
   "ocamlfind"  {build}
 ]
 available: [ocaml-version >= "4.02.3"]

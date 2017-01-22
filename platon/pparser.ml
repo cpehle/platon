@@ -52,7 +52,6 @@ let ident (ps:env) : (string * Position.t * Position.t, Parse_error.t * Position
 let rec term (ps:env) : (Term.t, Parse_error.t * Position.t * Position.t) Result.t =
   let open Result.Monad_infix in
   peek ps >>= function
-
   | Token.IDENT id ->
      ident ps >>= fun (id,p,p') ->
      Result.return  (Term.Variable id)
